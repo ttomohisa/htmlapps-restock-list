@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f5f5f2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Restock List</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316624F'/%3E%3Cpath d='M18 25h28l-3 23H21z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M25 25c0-7 3-11 7-11s7 4 7 11M27 35h10M32 30v10' fill='none' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f2;
+      --surface: #fff;
+      --surface-muted: #f0f0ed;
+      --surface-hover: #e9e9e5;
+      --text: #20211f;
+      --muted: #676a64;
+      --line: #dadbd6;
+      --line-strong: #bfc1ba;
+      --accent: #16624f;
+      --accent-hover: #0e503f;
+      --accent-soft: #e1f0ea;
+      --warning: #986b13;
+      --warning-soft: #fff3d8;
+      --danger: #b3261e;
+      --danger-soft: #fce8e6;
+      --focus: #4d8bc7;
+      --shadow-sm: 0 1px 2px rgba(25,28,24,.08),0 1px 6px rgba(25,28,24,.04);
+      --shadow-md: 0 12px 34px rgba(25,28,24,.12);
+      --header-height: 66px;
+      --app-mobile-bottom-bar-height: 74px;
+    }
+    * { box-sizing: border-box; }
+    html { min-height:100%; background:var(--bg); scroll-behavior:smooth; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif; font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+    button,input,select { font:inherit; color:inherit; }
+    button { touch-action:manipulation; }
+    button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible { outline:3px solid color-mix(in srgb,var(--focus) 55%,transparent); outline-offset:2px; }
+    .sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+    .app-header { position:sticky; z-index:40; top:0; min-height:var(--header-height); border-bottom:1px solid color-mix(in srgb,var(--line) 82%,transparent); background:color-mix(in srgb,var(--bg) 92%,transparent); backdrop-filter:blur(16px) saturate(1.2); }
+    .header-inner { width:min(1180px,100%); min-height:var(--header-height); margin:0 auto; padding:10px clamp(14px,2.8vw,30px); display:flex; align-items:center; gap:14px; }
+    .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+    .brand-mark { display:grid; place-items:center; width:38px; height:38px; flex:0 0 auto; border-radius:11px; background:var(--accent); color:white; box-shadow:var(--shadow-sm); }
+    .brand-mark svg { width:22px; height:22px; }
+    .brand-copy { min-width:0; }
+    .brand-name { margin:0; font-size:17px; line-height:1.2; letter-spacing:.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .version-badge { display:inline-flex; align-items:center; margin-left:7px; padding:1px 6px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:var(--surface-muted); font-size:10px; font-weight:650; vertical-align:2px; }
+    .brand-meta { margin:2px 0 0; color:var(--muted); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .header-actions { margin-left:auto; display:flex; align-items:center; gap:12px; }
+    .language-button,.header-icon-button { border:0; background:transparent; color:var(--muted); cursor:pointer; font-weight:750; }
+    .language-button { padding:6px 1px; font-size:12px; }
+    .header-icon-button { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; padding:0; }
+    .header-icon-button:hover,.language-button:hover { color:var(--text); background:var(--surface-hover); }
+    .header-icon-button svg { width:20px; height:20px; }
+    .main { width:min(1180px,100%); margin:0 auto; padding:22px clamp(14px,2.8vw,30px) 58px; }
+    .page-intro { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:0 2px 16px; }
+    .page-intro h1 { margin:0; font-size:clamp(22px,3vw,28px); line-height:1.28; letter-spacing:-.03em; }
+    .page-intro p { margin:5px 0 0; max-width:760px; color:var(--muted); font-size:13px; }
+    .local-badge { display:inline-flex; align-items:center; gap:7px; flex:0 0 auto; margin-top:3px; padding:7px 10px; border:1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); border-radius:999px; color:var(--accent); background:var(--accent-soft); font-size:12px; font-weight:700; white-space:nowrap; }
+    .local-badge svg { width:15px; height:15px; }
+    .overview-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:24px; }
+    .metric { padding:13px 14px; border:1px solid var(--line); border-radius:13px; background:var(--surface); box-shadow:var(--shadow-sm); }
+    .metric-label { color:var(--muted); font-size:11px; font-weight:700; }
+    .metric-value { display:block; margin-top:3px; font-size:23px; line-height:1.2; font-weight:800; letter-spacing:-.03em; }
+    .metric-value small { margin-left:4px; color:var(--muted); font-size:11px; font-weight:650; }
+    .app-mobile-page { display:block; scroll-margin-top:84px; }
+    .section-card { margin:0 0 22px; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:var(--shadow-sm); overflow:hidden; }
+    .section-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; padding:18px 18px 14px; border-bottom:1px solid var(--line); }
+    .section-head h2 { margin:0; font-size:19px; letter-spacing:-.02em; }
+    .section-head p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .section-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+    .button { min-height:40px; padding:8px 13px; border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--text); font-weight:750; cursor:pointer; transition:.15s ease; }
+    .button:hover { border-color:var(--line-strong); background:var(--surface-hover); }
+    .button:active { transform:translateY(1px); }
+    .button.primary { border-color:var(--accent); background:var(--accent); color:#fff; }
+    .button.primary:hover { border-color:var(--accent-hover); background:var(--accent-hover); }
+    .button.ghost { border-color:transparent; background:transparent; color:var(--muted); }
+    .button.danger { color:var(--danger); }
+    .button.small { min-height:34px; padding:5px 9px; font-size:12px; }
+    .icon-only { width:36px; min-width:36px; padding:0; display:grid; place-items:center; }
+    .icon-only svg { width:17px; height:17px; }
+    .quick-add { display:grid; grid-template-columns:minmax(0,1fr) 180px auto; gap:8px; padding:14px 18px; background:var(--surface-muted); border-bottom:1px solid var(--line); }
+    .field { width:100%; min-height:40px; padding:8px 10px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+    .field:hover { border-color:var(--line-strong); }
+    .field-label { display:grid; gap:5px; color:var(--muted); font-size:11px; font-weight:700; }
+    .list-body { padding:0; }
+    .empty-state { padding:38px 20px; text-align:center; color:var(--muted); }
+    .empty-state svg { width:34px; height:34px; color:var(--line-strong); }
+    .empty-state strong { display:block; margin-top:8px; color:var(--text); font-size:14px; }
+    .empty-state p { max-width:500px; margin:5px auto 0; font-size:12px; }
+    .group-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 18px; background:#fafaf8; border-top:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.04em; }
+    .group-head:first-child { border-top:0; }
+    .dense-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; align-items:center; gap:10px; min-height:56px; padding:8px 14px 8px 18px; border-bottom:1px solid color-mix(in srgb,var(--line) 78%,transparent); }
+    .dense-row:last-child { border-bottom:0; }
+    .dense-row:hover { background:#fcfcfa; }
+    .regular-row { grid-template-columns:minmax(100px,1fr) minmax(270px,1.45fr) auto; }
+    .regular-row .state-control { width:100%; max-width:380px; justify-self:end; }
+    .regular-row .row-actions { justify-self:end; }
+    .purchase-check { appearance:none; width:24px; height:24px; margin:0; border:1.6px solid var(--line-strong); border-radius:8px; background:#fff; cursor:pointer; display:grid; place-items:center; }
+    .purchase-check::after { content:""; width:10px; height:6px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); opacity:0; }
+    .purchase-check:checked { border-color:var(--accent); background:var(--accent); }
+    .purchase-check:checked::after { opacity:1; }
+    .row-main { min-width:0; }
+    .row-title-line { display:flex; align-items:center; min-width:0; gap:7px; }
+    .row-name { min-width:0; font-size:14px; font-weight:750; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .row-meta { margin-top:2px; color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .status-pill { display:inline-flex; align-items:center; gap:4px; flex:0 0 auto; padding:2px 7px; border-radius:999px; font-size:10px; font-weight:800; }
+    .status-pill.low { background:var(--warning-soft); color:var(--warning); }
+    .status-pill.out { background:var(--danger-soft); color:var(--danger); }
+    .status-pill.manual { background:var(--surface-muted); color:var(--muted); }
+    .state-control { display:inline-grid; grid-template-columns:repeat(3,1fr); gap:2px; padding:2px; border:1px solid var(--line); border-radius:9px; background:var(--surface-muted); }
+    .state-button { min-width:48px; min-height:31px; padding:4px 7px; border:0; border-radius:7px; background:transparent; color:var(--muted); font-size:11px; font-weight:800; cursor:pointer; }
+    .state-button:hover { color:var(--text); }
+    .state-button.is-active[data-state="stocked"] { background:#fff; color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.07); }
+    .state-button.is-active[data-state="low"] { background:var(--warning-soft); color:var(--warning); }
+    .state-button.is-active[data-state="out"] { background:var(--danger-soft); color:var(--danger); }
+    .toolbar-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 18px; border-bottom:1px solid var(--line); }
+    .segmented { display:flex; flex-wrap:wrap; gap:5px; }
+    .filter-button { min-height:34px; padding:5px 10px; border:1px solid var(--line); border-radius:999px; background:var(--surface); color:var(--muted); font-size:11px; font-weight:750; cursor:pointer; }
+    .filter-button.is-active { border-color:color-mix(in srgb,var(--accent) 34%,var(--line)); background:var(--accent-soft); color:var(--accent); }
+    .regular-grid { padding:0; }
+    .history-day { border-bottom:1px solid var(--line); }
+    .history-day:last-child { border-bottom:0; }
+    .history-date { padding:10px 18px 8px; color:var(--muted); font-size:11px; font-weight:800; }
+    .history-entry { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:10px; padding:8px 18px; }
+    .history-entry-main { min-width:0; }
+    .history-entry:last-child { padding-bottom:13px; }
+    .history-name { font-size:13px; font-weight:700; }
+    .history-meta { color:var(--muted); font-size:11px; }
+    .history-time { color:var(--muted); font-size:11px; }
+    .hint-banner { display:none; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; padding:12px 14px; border:1px solid color-mix(in srgb,var(--accent) 27%,var(--line)); border-radius:12px; background:var(--accent-soft); }
+    .hint-banner.is-visible { display:flex; }
+    .hint-banner strong { display:block; font-size:13px; }
+    .hint-banner p { margin:2px 0 0; color:var(--muted); font-size:11px; }
+    .sample-banner { display:flex; align-items:center; gap:14px; margin:0 0 16px; padding:12px 14px; border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line)); border-radius:12px; background:#e9efec; }
+    .sample-banner[hidden] { display:none!important; }
+    .sample-banner-icon { display:grid; place-items:center; width:42px; height:42px; flex:0 0 auto; border-radius:12px; background:#f3f5f2; color:var(--accent); border:1px solid color-mix(in srgb,var(--accent) 10%,var(--line)); }
+    .sample-banner-icon svg { width:18px; height:18px; }
+    .sample-banner-copy { min-width:0; flex:1 1 auto; }
+    .sample-banner-copy strong { display:block; font-size:13px; line-height:1.35; }
+    .sample-banner-copy p { margin:3px 0 0; color:var(--muted); font-size:11px; line-height:1.45; }
+    .sample-banner-button { flex:0 0 auto; min-height:42px; padding-inline:16px; border-color:#c9cec7; border-radius:12px; background:#fff; color:var(--text); font-weight:800; }
+    .sample-banner-button:hover { background:#f8f8f6; }
+    .combo { position:relative; }
+    .combo-input-wrap { position:relative; display:flex; }
+    .combo-input { padding-right:44px; }
+    .combo-button { position:absolute; right:0; top:0; width:38px; height:100%; border:0; border-radius:0 10px 10px 0; background:transparent; color:#666a65; cursor:pointer; display:grid; place-items:center; padding:0 1px 0 0; }
+    .combo-button:hover { background:transparent; color:var(--text); }
+    .combo-button svg { width:12px; height:12px; stroke-width:1.55; }
+    .combo-menu { position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:30; display:none; max-height:200px; overflow:auto; padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-md); }
+    .combo.is-open .combo-menu { display:block; }
+    .combo-option { width:100%; min-height:36px; padding:8px 10px; border:0; border-radius:8px; background:transparent; text-align:left; color:var(--text); cursor:pointer; }
+    .combo-option:hover,.combo-option:focus-visible { background:var(--surface-hover); }
+    .combo-empty { padding:8px 10px; color:var(--muted); font-size:12px; }
+    .quick-name-wrap { position:relative; min-width:0; }
+    .quick-name-wrap > .field { display:block; }
+    .quick-suggest-menu { position:absolute; z-index:35; left:0; right:0; top:calc(100% + 6px); display:none; max-height:250px; overflow:auto; padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-md); }
+    .quick-suggest-menu.is-open { display:block; }
+    .quick-suggest-option { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; width:100%; min-height:42px; padding:7px 10px; border:0; border-radius:8px; background:transparent; text-align:left; cursor:pointer; }
+    .quick-suggest-option:hover,.quick-suggest-option.is-active { background:var(--surface-hover); }
+    .quick-suggest-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; }
+    .quick-suggest-meta { color:var(--muted); font-size:11px; white-space:nowrap; }
+    .app-toast { position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:90; display:flex; align-items:center; gap:12px; max-width:min(420px,calc(100vw - 36px)); padding:10px 12px 10px 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-md); opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .18s ease,transform .18s ease; }
+    .app-toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+    .app-toast-message { min-width:0; flex:1; font-size:13px; }
+    .app-toast-action { min-height:34px; padding:5px 8px; border:0; border-radius:8px; background:transparent; color:var(--accent); font-weight:800; cursor:pointer; }
+    .app-toast-action[hidden] { display:none; }
+    dialog { width:min(620px,calc(100% - 28px)); max-height:min(760px,calc(100dvh - 28px)); padding:0; overflow:hidden; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--text); box-shadow:var(--shadow-md); }
+    dialog::backdrop { background:rgba(15,17,14,.5); backdrop-filter:blur(3px); }
+    .dialog-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 18px; border-bottom:1px solid var(--line); }
+    .dialog-header h2 { margin:0; font-size:17px; }
+    .dialog-close { display:grid; place-items:center; width:36px; height:36px; border:0; border-radius:10px; background:transparent; cursor:pointer; }
+    .dialog-close:hover { background:var(--surface-hover); }
+    .dialog-close svg { width:19px; height:19px; }
+    .dialog-body { padding:18px; overflow:auto; max-height:calc(100dvh - 120px); }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .form-grid .wide { grid-column:1/-1; }
+    .dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+    .dialog-actions > .danger:first-child { margin-right:auto; }
+    .help-body h3 { margin:22px 0 6px; font-size:14px; }
+    .help-body h3:first-child { margin-top:0; }
+    .help-body p,.help-body li { color:var(--muted); font-size:13px; line-height:1.7; }
+    .help-body ol,.help-body ul { padding-left:22px; }
+    .manage-panel { display:grid; gap:16px; }
+    .manage-block { padding:14px; border:1px solid var(--line); border-radius:12px; }
+    .manage-block h3 { margin:0 0 4px; font-size:14px; }
+    .manage-block p { margin:0 0 10px; color:var(--muted); font-size:11px; }
+    .filename-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+    .filename-control { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+    .filename-control:focus-within { border-color:var(--focus); box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 20%,transparent); }
+    .filename-input { width:100%; min-width:0; min-height:40px; padding:8px 10px; border:0; outline:0; background:transparent; }
+    .filename-extension { padding:0 10px; color:var(--muted); font-size:12px; }
+    .app-confirm-dialog { width:min(420px,calc(100% - 24px)); max-width:calc(100% - 24px); }
+    .app-confirm-body { padding:18px; }
+    .app-confirm-message { margin:0; color:var(--muted); font-size:13px; line-height:1.7; }
+    .app-confirm-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:18px; }
+    .app-mobile-bottom-bar { display:none; }
+    .footer { width:min(1180px,100%); margin:0 auto; padding:0 clamp(14px,2.8vw,30px) 30px; color:var(--muted); font-size:11px; }
+    @media(max-width:820px){
+      .page-intro{flex-direction:column;gap:10px}.local-badge{align-self:flex-start}.overview-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-add{grid-template-columns:minmax(0,1fr) 140px auto}.section-head{align-items:stretch;flex-direction:column}.section-actions{justify-content:flex-start}
+    }
+    @media(max-width:600px){
+      :root{--header-height:58px}.header-inner{padding-block:8px}.brand-mark{width:34px;height:34px;border-radius:10px}.brand-name{font-size:15px}.brand-meta{display:none}.main{padding-top:16px;padding-bottom:20px}.page-intro{padding-bottom:12px}.page-intro h1{font-size:21px}.overview-strip{display:none}.metric{padding:10px 11px}.metric-value{font-size:19px}.section-card{margin-bottom:14px;border-radius:14px}.section-head{padding:14px 14px 12px}.section-head p{font-size:11px}.quick-add{grid-template-columns:minmax(0,1fr) auto;padding:10px 12px}.quick-add select{display:none}.toolbar-row{align-items:flex-start;flex-direction:column;padding:10px 12px}.dense-row{grid-template-columns:auto minmax(0,1fr) auto;gap:8px;padding:8px 10px 8px 12px}.dense-row .state-control{grid-column:2/-1;justify-self:stretch}.regular-row{grid-template-columns:minmax(70px,1fr) minmax(220px,2.2fr) 34px;gap:7px;padding:7px 8px 7px 12px;min-height:50px}.regular-row .state-control{grid-column:auto;justify-self:stretch;width:100%;max-width:none}.regular-row .row-main{min-width:0}.regular-row .row-meta{margin-top:1px}.regular-row .row-actions{align-self:center}.regular-row .icon-only{width:32px;min-width:32px}.state-control{display:grid;width:100%}.state-button{min-width:0}.row-actions{align-self:start}.group-head{padding-inline:12px}.history-date,.history-entry{padding-inline:12px}.hint-banner{align-items:flex-start;flex-direction:column}.sample-banner{align-items:center;flex-direction:row;gap:8px;padding:10px}.sample-banner-icon{width:38px;height:38px;border-radius:10px}.sample-banner-copy strong{font-size:12px}.sample-banner-copy p{font-size:10px;line-height:1.35}.sample-banner-button{min-height:38px;padding-inline:12px;font-size:12px;white-space:nowrap}.form-grid{grid-template-columns:1fr}.form-grid .wide{grid-column:auto}.dialog-actions{display:grid;grid-template-columns:1fr}.dialog-actions > .danger:first-child{margin-right:0}.app-toast{left:12px;right:12px;bottom:calc(var(--app-mobile-bottom-bar-height) + 10px + env(safe-area-inset-bottom));max-width:none}body.has-mobile-bottom-bar{padding-bottom:calc(var(--app-mobile-bottom-bar-height) + env(safe-area-inset-bottom))}body.has-mobile-page-tabs .app-mobile-page{display:none}body.has-mobile-page-tabs .app-mobile-page.is-mobile-active{display:block}.app-mobile-bottom-bar{position:fixed;z-index:80;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));border-top:1px solid color-mix(in srgb,var(--line) 82%,transparent);background:rgba(255,255,255,.95);box-shadow:0 -8px 24px rgba(20,22,20,.06);backdrop-filter:blur(18px) saturate(1.35)}.app-mobile-bottom-item{position:relative;min-width:0;min-height:54px;padding:5px 4px;border:0;border-radius:12px;background:transparent;color:var(--muted);display:grid;place-items:center;align-content:center;gap:3px;font-size:10px;font-weight:750;cursor:pointer}.app-mobile-bottom-item svg{width:21px;height:21px}.app-mobile-bottom-item span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-mobile-bottom-item.is-active,.app-mobile-bottom-item[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}dialog{width:100%;max-width:none;margin:auto 0 0;border-width:1px 0 0;border-radius:22px 22px 0 0}.dialog-body{padding-bottom:calc(18px + env(safe-area-inset-bottom))}.app-confirm-dialog{width:min(420px,calc(100% - 24px));max-width:calc(100% - 24px);margin:auto;border-width:1px;border-radius:16px}.app-confirm-dialog .app-confirm-body{padding-bottom:18px}.app-confirm-actions{grid-template-columns:1fr}.footer{display:none}
+    }
+    @media(max-width:390px){.regular-row{grid-template-columns:minmax(58px,.8fr) minmax(196px,2.2fr) 30px;gap:5px;padding-left:9px;padding-right:6px}.regular-row .row-name{font-size:13px}.regular-row .row-meta{font-size:10px}.regular-row .state-button{padding-inline:5px;font-size:10px}.regular-row .icon-only{width:30px;min-width:30px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+  </style>
+</head>
+<body class="has-mobile-bottom-bar has-mobile-page-tabs">
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9h15l-1.4 10H5.9z"/><path d="M8.5 9c0-3.6 1.4-5.5 3.5-5.5s3.5 1.9 3.5 5.5M9 14h6M12 11v6"/></svg>
+      </div>
+      <div class="brand-copy">
+        <p class="brand-name"><span id="brandName">Restock List</span><span class="version-badge" id="versionBadge">v1.0.0</span></p>
+        <p class="brand-meta" data-i18n="brandMeta">定番から必要なものだけ拾う買い物リスト</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
+      <button class="header-icon-button" id="manageButton" type="button" data-i18n-aria-label="manageTitle" data-i18n-title="manageTitle" title="データ管理" aria-label="データ管理"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V22a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 20.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.02A1.7 1.7 0 0 0 10.09 3H10a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56h.02a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.02A1.7 1.7 0 0 0 21 10.09H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.35 15z"/></svg></button>
+      <button class="header-icon-button" id="helpButton" type="button" data-i18n-aria-label="helpTitle" data-i18n-title="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1M12 17h.01"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <section class="page-intro" aria-labelledby="heroTitle">
+    <div><h1 id="heroTitle" data-i18n="introTitle">定番から必要なものだけ拾う。</h1><p data-i18n="lead">定番品を「ある・少ない・ない」でタップするだけ。必要なものが今回の買い物リストに集まります。</p></div>
+    <div class="local-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span data-i18n="localBadge">完全ローカル処理</span></div>
+  </section>
+
+  <div id="sampleDataBanner" class="sample-banner" role="status"><div class="sample-banner-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3M12 19v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M2 12h3M19 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/><circle cx="12" cy="12" r="3.5"/></svg></div><div class="sample-banner-copy"><strong data-i18n="sampleBannerTitle">サンプルデータを表示しています</strong><p data-i18n="sampleBannerLead">実際に使い始める前に、サンプルの定番と購入履歴を消せます。</p></div><button class="button sample-banner-button" id="clearSampleTopButton" type="button" data-i18n="sampleClear">サンプルデータをクリア</button></div>
+
+  <div id="sharedListBanner" class="hint-banner" role="status"><div><strong data-i18n="sharedListTitle">共有された買い物リストがあります</strong><p id="sharedListSummary"></p></div><div class="section-actions"><button class="button small" id="dismissSharedButton" type="button" data-i18n="dismiss">閉じる</button><button class="button primary small" id="importSharedButton" type="button" data-i18n="importShared">今回のリストに追加</button></div></div>
+
+  <section class="overview-strip" aria-label="Summary">
+    <div class="metric"><span class="metric-label" data-i18n="metricBuy">今回買う</span><strong class="metric-value" id="metricBuy">0<small data-i18n="itemsUnit">件</small></strong></div>
+    <div class="metric"><span class="metric-label" data-i18n="metricOut">ない</span><strong class="metric-value" id="metricOut">0<small data-i18n="itemsUnit">件</small></strong></div>
+    <div class="metric"><span class="metric-label" data-i18n="metricLow">少ない</span><strong class="metric-value" id="metricLow">0<small data-i18n="itemsUnit">件</small></strong></div>
+  </section>
+
+  <!-- APP:BEGIN -->
+  <section id="buyPage" class="app-mobile-page is-mobile-active section-card" aria-labelledby="buyTitle">
+    <div class="section-head">
+      <div><h2 id="buyTitle" data-i18n="buyTitle">今回買う</h2><p data-i18n="buyLead">「少ない」「ない」にした定番品と、今回だけ追加したものがここに集まります。</p></div>
+      <div class="section-actions"><button class="button small" id="shareButton" type="button" data-i18n="share">共有リンク</button><button class="button primary small" id="openAddButton" type="button" data-i18n="addItem">＋ 追加</button></div>
+    </div>
+    <form class="quick-add" id="quickAddForm">
+      <label class="sr-only" for="quickAddName" data-i18n="itemName">品名</label><div class="quick-name-wrap"><input class="field" id="quickAddName" maxlength="80" autocomplete="off" data-i18n-placeholder="quickAddPlaceholder" placeholder="例：牛乳、ティッシュ、電池" aria-autocomplete="list" aria-controls="quickNameSuggestions" aria-expanded="false"><div class="quick-suggest-menu" id="quickNameSuggestions" role="listbox"></div></div>
+      <label class="sr-only" for="quickAddStore" data-i18n="store">店</label><select class="field" id="quickAddStore"></select>
+      <button class="button primary" type="submit" data-i18n="quickAdd">追加</button>
+    </form>
+    <div class="list-body" id="buyList"></div>
+  </section>
+
+  <section id="regularPage" class="app-mobile-page section-card" aria-labelledby="regularTitle">
+    <div class="section-head">
+      <div><h2 id="regularTitle" data-i18n="regularTitle">定番</h2><p data-i18n="regularLead">数量は数えません。「ある・少ない・ない」だけで補充状態を管理します。</p></div>
+      <div class="section-actions"><button class="button primary small" id="addRegularButton" type="button" data-i18n="addRegular">＋ 定番を追加</button></div>
+    </div>
+    <div class="toolbar-row"><div class="segmented" id="statusFilters"><button class="filter-button is-active" type="button" data-filter="all" data-i18n="filterAll">すべて</button><button class="filter-button" type="button" data-filter="stocked" data-i18n="stocked">ある</button><button class="filter-button" type="button" data-filter="low" data-i18n="low">少ない</button><button class="filter-button" type="button" data-filter="out" data-i18n="out">ない</button></div><span id="regularCount" class="history-meta"></span></div>
+    <div id="regularList" class="regular-grid"></div>
+  </section>
+
+  <section id="historyPage" class="app-mobile-page section-card" aria-labelledby="historyTitle">
+    <div class="section-head"><div><h2 id="historyTitle" data-i18n="historyTitle">購入履歴</h2><p data-i18n="historyLead">チェックした品だけを記録します。価格や在庫数の入力は不要です。</p></div><div class="section-actions"><button class="button danger small" id="clearHistoryButton" type="button" data-i18n="clearHistory">履歴を消去</button></div></div>
+    <div id="historyList"></div>
+  </section>
+  <!-- APP:END -->
+</main>
+
+<footer class="footer"><span id="footerName">Restock List</span> · <span data-i18n="footer">Single HTML · Local-first · No runtime network</span></footer>
+
+<nav class="app-mobile-bottom-bar" id="appMobileBottomBar" aria-label="Mobile navigation">
+  <button class="app-mobile-bottom-item is-active" type="button" data-mobile-key="buy" data-mobile-page-target="buyPage" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h2l2 10h9l2-7H7"/><circle cx="10" cy="19" r="1"/><circle cx="17" cy="19" r="1"/></svg><span data-i18n="navBuy">買う</span></button>
+  <button class="app-mobile-bottom-item" type="button" data-mobile-key="regular" data-mobile-page-target="regularPage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14v14H5zM8 3h8v6H8z"/><path d="M8 13h8M8 17h5"/></svg><span data-i18n="navRegular">定番</span></button>
+  <button class="app-mobile-bottom-item" type="button" data-mobile-key="history" data-mobile-page-target="historyPage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 3-6.2L4 8"/><path d="M4 4v4h4M12 7v5l3 2"/></svg><span data-i18n="navHistory">履歴</span></button>
+</nav>
+
+<div class="app-toast" id="appToast" role="status" aria-live="polite"><div class="app-toast-message" id="appToastMessage"></div><button class="app-toast-action" id="appToastAction" type="button" hidden></button></div>
+
+<dialog id="itemDialog" aria-labelledby="itemDialogTitle">
+  <div class="dialog-header"><h2 id="itemDialogTitle" data-i18n="addRegular">定番を追加</h2><button class="dialog-close" id="closeItemDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <form class="dialog-body" id="itemForm">
+    <input type="hidden" id="editItemId">
+    <div class="form-grid">
+      <label class="field-label wide"><span data-i18n="itemName">品名</span><input class="field" id="itemName" maxlength="80" required autocomplete="off"></label>
+      <label class="field-label"><span data-i18n="category">カテゴリ</span><div class="combo" id="itemCategoryCombo" data-combo="category"><div class="combo-input-wrap"><input class="field combo-input" id="itemCategory" maxlength="40" autocomplete="off"><button class="combo-button" id="itemCategoryToggle" type="button" aria-label="Open category suggestions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button></div><div class="combo-menu" id="itemCategoryMenu"></div></div></label>
+      <label class="field-label"><span data-i18n="store">店</span><div class="combo" id="itemStoreCombo" data-combo="store"><div class="combo-input-wrap"><input class="field combo-input" id="itemStore" maxlength="50" autocomplete="off"><button class="combo-button" id="itemStoreToggle" type="button" aria-label="Open store suggestions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button></div><div class="combo-menu" id="itemStoreMenu"></div></div></label>
+      <label class="field-label"><span data-i18n="initialState">現在の状態</span><select class="field" id="itemState"><option value="stocked" data-i18n="stocked">ある</option><option value="low" data-i18n="low">少ない</option><option value="out" data-i18n="out">ない</option></select></label>
+      <label class="field-label"><span data-i18n="regularFlag">定番として残す</span><select class="field" id="itemRegular"><option value="yes" data-i18n="yes">はい</option><option value="no" data-i18n="no">いいえ（今回だけ）</option></select></label>
+    </div>
+    <div class="dialog-actions"><button class="button danger" id="deleteItemButton" type="button" data-i18n="delete" hidden>削除</button><button class="button" id="cancelItemButton" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="save">保存</button></div>
+  </form>
+</dialog>
+
+<dialog id="helpDialog" aria-labelledby="helpDialogTitle">
+  <div class="dialog-header"><h2 id="helpDialogTitle" data-i18n="helpTitle">使い方と注意事項</h2><button class="dialog-close" id="closeHelpButton" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="dialog-body help-body">
+    <h3 data-i18n="helpBasicsTitle">基本操作</h3><ol><li data-i18n="helpStep1">定番ページで品物を登録し、家で減ってきたら「少ない」「ない」をタップします。</li><li data-i18n="helpStep2">対象品は自動で「今回買う」に集まります。買い物中はチェックするだけです。</li><li data-i18n="helpStep3">購入済みにすると状態は「ある」に戻り、購入履歴だけが残ります。</li></ol>
+    <h3 data-i18n="helpPrivacyTitle">プライバシー</h3><p data-i18n="helpPrivacyBody">商品名・履歴・設定はこのブラウザーの端末内だけに保存されます。このアプリは実行時の通信を行いません。</p>
+    <h3 data-i18n="helpShareTitle">共有</h3><p data-i18n="helpShareBody">「共有リンク」は現在の買い物リストだけをURLの # 以降に埋め込みます。サーバーへアップロードしません。受け取った側が開くと、追加前に内容を確認できます。</p>
+    <h3 data-i18n="helpNotesTitle">注意事項</h3><ul><li data-i18n="helpNoteStorage">ブラウザーのサイトデータを削除すると保存内容も消える場合があります。必要ならデータ管理からJSONを書き出してください。</li></ul>
+  </div>
+</dialog>
+
+<dialog id="manageDialog" aria-labelledby="manageDialogTitle">
+  <div class="dialog-header"><h2 id="manageDialogTitle" data-i18n="manageTitle">データ管理</h2><button class="dialog-close" id="closeManageButton" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="dialog-body manage-panel">
+    <div class="manage-block"><h3 data-i18n="exportTitle">バックアップを書き出す</h3><p data-i18n="exportLead">定番・履歴・設定をJSONとして保存します。</p><div class="filename-row"><span class="filename-control"><input class="filename-input" id="outputFilename" maxlength="120" autocomplete="off" value="restock-list-backup"><span class="filename-extension">.json</span></span><button class="button primary" id="exportButton" type="button" data-i18n="export">保存</button></div></div>
+    <div class="manage-block"><h3 data-i18n="importTitle">バックアップを読み込む</h3><p data-i18n="importLead">この端末の現在データと置き換えます。</p><input class="field" id="importFile" type="file" accept="application/json,.json"></div>
+    <div class="manage-block"><h3 data-i18n="resetTitle">初期状態に戻す</h3><p data-i18n="resetLead">定番・履歴・設定をサンプルへ戻します。</p><button class="button danger" id="resetButton" type="button" data-i18n="reset">すべてリセット</button></div>
+  </div>
+</dialog>
+
+<dialog class="app-confirm-dialog" id="appConfirmDialog" aria-labelledby="appConfirmTitle">
+  <div class="dialog-header"><h2 id="appConfirmTitle" data-i18n="confirmTitle">確認</h2><button class="dialog-close" id="appConfirmClose" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <div class="app-confirm-body"><p class="app-confirm-message" id="appConfirmMessage"></p><div class="app-confirm-actions"><button class="button" id="appConfirmCancel" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" id="appConfirmOk" type="button" data-i18n="confirmAction">実行する</button></div></div>
+</dialog>
+
+<script id="app-config" type="application/json">{"$schema":"./schemas/app-config.schema.json","name":"Restock List","nameJa":"Restock List","slug":"restock-list","version":"1.0.0","description":"A local-first shopping list that turns regular items into a lightweight restock workflow.","descriptionJa":"定番品を「ある・少ない・ない」で管理する、完全ローカル処理のシンプルな買い物リストです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-restock-list"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":2,"selfExtractWarningMb":1}}}</script>
+<script id="build-manifest" type="application/json">{"schemaVersion":2,"builder":"single-html-app-template/1.0","generatedAtUtc":"2026-08-26T01:26:58.5447106Z","app":{"name":"Restock List","slug":"restock-list","version":"1.0.0"},"dependencies":[]}</script>
+<script id="embedded-asset-bundle" type="application/json">{"schemaVersion":2,"dependencies":{}}</script>
+<script>
+(() => {
+  'use strict';
+  const APP_CONFIG = JSON.parse(document.getElementById('app-config').textContent);
+  const BUILD_MANIFEST = JSON.parse(document.getElementById('build-manifest').textContent);
+  const assetBundle = JSON.parse(document.getElementById('embedded-asset-bundle').textContent);
+  const assetByteCache = new Map();
+  const blobUrls = new Set();
+  function getAsset(dependencyId, assetKey) { const a=assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey]; if(!a) throw new Error(`Embedded asset not found: ${dependencyId}/${assetKey}`); return a; }
+  function decodeBase64Bytes(value){ const b=atob(value); const out=new Uint8Array(b.length); for(let i=0;i<b.length;i++) out[i]=b.charCodeAt(i); return out; }
+  async function inflateAsset(asset){ const stored=decodeBase64Bytes(asset.base64); if(!asset.compression||asset.compression==='none') return stored; if(asset.compression!=='gzip') throw new Error('Unsupported embedded asset compression'); const stream=new Blob([stored]).stream().pipeThrough(new DecompressionStream('gzip')); return new Uint8Array(await new Response(stream).arrayBuffer()); }
+  window.StandaloneAssets=Object.freeze({manifest:BUILD_MANIFEST,list(){return Object.entries(assetBundle.dependencies||{}).flatMap(([id,d])=>Object.keys(d.assets||{}).map(k=>`${id}/${k}`));},has(id,key){return Boolean(assetBundle.dependencies?.[id]?.assets?.[key]);},bytes(id,key){const a=getAsset(id,key); if(a.compression&&a.compression!=='none') throw new Error('Use bytesAsync for compressed assets'); return decodeBase64Bytes(a.base64);},async bytesAsync(id,key){const ck=`${id}/${key}`; if(!assetByteCache.has(ck)) assetByteCache.set(ck,inflateAsset(getAsset(id,key))); return new Uint8Array(await assetByteCache.get(ck));},text(id,key){return new TextDecoder().decode(this.bytes(id,key));},async textAsync(id,key){return new TextDecoder().decode(await this.bytesAsync(id,key));},blobUrl(id,key){const a=getAsset(id,key); const url=URL.createObjectURL(new Blob([this.bytes(id,key)],{type:a.mime||'application/octet-stream'})); blobUrls.add(url); return url;},async blobUrlAsync(id,key){const a=getAsset(id,key); const url=URL.createObjectURL(new Blob([await this.bytesAsync(id,key)],{type:a.mime||'application/octet-stream'})); blobUrls.add(url); return url;}});
+  window.addEventListener('pagehide',()=>{blobUrls.forEach(URL.revokeObjectURL);blobUrls.clear();});
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const DAY = 86400000;
+  const storageKeys = { data:`${APP_CONFIG.slug}:data`, language:`${APP_CONFIG.slug}:language` };
+  const defaultSettings = { defaultStore:'スーパー', sampleDataVisible:true };
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`);
+  const now = Date.now();
+  const sampleData = {
+    items:[
+      {id:'milk',nameJa:'牛乳',nameEn:'Milk',name:'牛乳',category:'乳製品',store:'スーパー',status:'low',regular:true,createdAt:now-90*DAY},
+      {id:'eggs',nameJa:'卵',nameEn:'Eggs',name:'卵',category:'乳製品',store:'スーパー',status:'stocked',regular:true,createdAt:now-90*DAY},
+      {id:'bread',nameJa:'食パン',nameEn:'Bread',name:'食パン',category:'パン',store:'スーパー',status:'out',regular:true,createdAt:now-90*DAY},
+      {id:'banana',nameJa:'バナナ',nameEn:'Bananas',name:'バナナ',category:'野菜・果物',store:'スーパー',status:'stocked',regular:true,createdAt:now-90*DAY},
+      {id:'yogurt',nameJa:'ヨーグルト',nameEn:'Yogurt',name:'ヨーグルト',category:'乳製品',store:'スーパー',status:'stocked',regular:true,createdAt:now-90*DAY},
+      {id:'tissue',nameJa:'ティッシュ',nameEn:'Tissues',name:'ティッシュ',category:'日用品',store:'ドラッグストア',status:'stocked',regular:true,createdAt:now-90*DAY},
+      {id:'detergent',nameJa:'洗剤',nameEn:'Detergent',name:'洗剤',category:'日用品',store:'ドラッグストア',status:'low',regular:true,createdAt:now-90*DAY},
+      {id:'coffee',nameJa:'コーヒー',nameEn:'Coffee',name:'コーヒー',category:'飲料',store:'スーパー',status:'stocked',regular:true,createdAt:now-90*DAY}
+    ],
+    history:[
+      {id:'h1',itemId:'milk',name:'牛乳',store:'スーパー',at:now-7*DAY},{id:'h2',itemId:'milk',name:'牛乳',store:'スーパー',at:now-13*DAY},{id:'h3',itemId:'milk',name:'牛乳',store:'スーパー',at:now-19*DAY},
+      {id:'h4',itemId:'eggs',name:'卵',store:'スーパー',at:now-8*DAY},{id:'h5',itemId:'eggs',name:'卵',store:'スーパー',at:now-15*DAY},{id:'h6',itemId:'eggs',name:'卵',store:'スーパー',at:now-22*DAY},
+      {id:'h7',itemId:'banana',name:'バナナ',store:'スーパー',at:now-5*DAY},{id:'h8',itemId:'banana',name:'バナナ',store:'スーパー',at:now-9*DAY},{id:'h9',itemId:'banana',name:'バナナ',store:'スーパー',at:now-13*DAY},
+      {id:'h10',itemId:'tissue',name:'ティッシュ',store:'ドラッグストア',at:now-38*DAY},{id:'h11',itemId:'tissue',name:'ティッシュ',store:'ドラッグストア',at:now-74*DAY},{id:'h12',itemId:'tissue',name:'ティッシュ',store:'ドラッグストア',at:now-111*DAY}
+    ],
+    settings:{defaultStore:'スーパー',sampleDataVisible:true}
+  };
+  const quickItemDictionary = [
+    {ja:'牛乳',en:'Milk',category:'乳製品'},{ja:'卵',en:'Eggs',category:'乳製品'},{ja:'食パン',en:'Bread',category:'パン'},{ja:'ヨーグルト',en:'Yogurt',category:'乳製品'},
+    {ja:'チーズ',en:'Cheese',category:'乳製品'},{ja:'バター',en:'Butter',category:'乳製品'},{ja:'納豆',en:'Natto',category:'食品'},{ja:'豆腐',en:'Tofu',category:'食品'},
+    {ja:'米',en:'Rice',category:'食品'},{ja:'パスタ',en:'Pasta',category:'食品'},{ja:'うどん',en:'Udon noodles',category:'食品'},{ja:'そば',en:'Soba noodles',category:'食品'},
+    {ja:'バナナ',en:'Bananas',category:'野菜・果物'},{ja:'りんご',en:'Apples',category:'野菜・果物'},{ja:'みかん',en:'Mandarins',category:'野菜・果物'},{ja:'玉ねぎ',en:'Onions',category:'野菜・果物'},
+    {ja:'じゃがいも',en:'Potatoes',category:'野菜・果物'},{ja:'にんじん',en:'Carrots',category:'野菜・果物'},{ja:'キャベツ',en:'Cabbage',category:'野菜・果物'},{ja:'トマト',en:'Tomatoes',category:'野菜・果物'},
+    {ja:'レタス',en:'Lettuce',category:'野菜・果物'},{ja:'きゅうり',en:'Cucumbers',category:'野菜・果物'},{ja:'鶏肉',en:'Chicken',category:'肉・魚'},{ja:'豚肉',en:'Pork',category:'肉・魚'},
+    {ja:'牛肉',en:'Beef',category:'肉・魚'},{ja:'鮭',en:'Salmon',category:'肉・魚'},{ja:'ツナ缶',en:'Canned tuna',category:'食品'},{ja:'ハム',en:'Ham',category:'肉・魚'},
+    {ja:'コーヒー',en:'Coffee',category:'飲料'},{ja:'お茶',en:'Tea',category:'飲料'},{ja:'水',en:'Water',category:'飲料'},{ja:'ジュース',en:'Juice',category:'飲料'},
+    {ja:'醤油',en:'Soy sauce',category:'調味料'},{ja:'味噌',en:'Miso',category:'調味料'},{ja:'塩',en:'Salt',category:'調味料'},{ja:'砂糖',en:'Sugar',category:'調味料'},
+    {ja:'マヨネーズ',en:'Mayonnaise',category:'調味料'},{ja:'ケチャップ',en:'Ketchup',category:'調味料'},{ja:'食用油',en:'Cooking oil',category:'調味料'},{ja:'冷凍食品',en:'Frozen food',category:'冷凍食品'},
+    {ja:'ティッシュ',en:'Tissues',category:'日用品'},{ja:'トイレットペーパー',en:'Toilet paper',category:'日用品'},{ja:'キッチンペーパー',en:'Paper towels',category:'日用品'},{ja:'ゴミ袋',en:'Trash bags',category:'日用品'},
+    {ja:'洗剤',en:'Laundry detergent',category:'日用品'},{ja:'食器用洗剤',en:'Dish soap',category:'日用品'},{ja:'シャンプー',en:'Shampoo',category:'日用品'},{ja:'ボディソープ',en:'Body wash',category:'日用品'},
+    {ja:'歯磨き粉',en:'Toothpaste',category:'日用品'},{ja:'歯ブラシ',en:'Toothbrush',category:'日用品'},{ja:'ラップ',en:'Plastic wrap',category:'日用品'},{ja:'アルミホイル',en:'Aluminum foil',category:'日用品'},
+    {ja:'電池',en:'Batteries',category:'日用品'},{ja:'ハンドソープ',en:'Hand soap',category:'日用品'}
+  ];
+  let data = loadData();
+  let language = readStorage(storageKeys.language) || detectLanguage();
+  let regularFilter = 'all';
+  let sharedPayload = null;
+
+  const translations = {
+    ja:{brandMeta:'定番から必要なものだけ拾う買い物リスト',introTitle:'定番から必要なものだけ拾う。',lead:'定番品を「ある・少ない・ない」でタップするだけ。必要なものが今回の買い物リストに集まります。',localBadge:'完全ローカル処理',metricBuy:'今回買う',metricOut:'ない',metricLow:'少ない',itemsUnit:'件',buyTitle:'今回買う',buyLead:'「少ない」「ない」にした定番品と、今回だけ追加したものがここに集まります。',share:'共有リンク',addItem:'＋ 追加',quickAddPlaceholder:'例：牛乳、ティッシュ、電池',quickAdd:'追加',regularTitle:'定番',regularLead:'数量は数えません。「ある・少ない・ない」だけで補充状態を管理します。',addRegular:'＋ 定番を追加',filterAll:'すべて',stocked:'ある',low:'少ない',out:'ない',historyTitle:'購入履歴',historyLead:'チェックした品だけを記録します。不要な履歴は個別に削除できます。',clearHistory:'履歴を消去',navBuy:'買う',navRegular:'定番',navHistory:'履歴',itemName:'品名',category:'カテゴリ',store:'店',initialState:'現在の状態',regularFlag:'定番として残す',yes:'はい',no:'いいえ（今回だけ）',cancel:'キャンセル',save:'保存',close:'閉じる',helpTitle:'使い方と注意事項',manageTitle:'データ管理',helpBasicsTitle:'基本操作',helpStep1:'定番ページで品物を登録し、家で減ってきたら「少ない」「ない」をタップします。',helpStep2:'対象品は自動で「今回買う」に集まります。買い物中はチェックするだけです。',helpStep3:'購入済みにすると状態は「ある」に戻り、履歴だけが残ります。',helpPrivacyTitle:'プライバシー',helpPrivacyBody:'商品名・履歴・設定はこのブラウザー内だけに保存されます。完全ローカル処理で、実行時の通信は行いません。',helpShareTitle:'共有',helpShareBody:'「共有リンク」は現在の買い物リストだけをURLの # 以降に埋め込みます。サーバーへアップロードしません。対応ブラウザーでは共有シートも使えます。',helpNotesTitle:'注意事項',helpNoteStorage:'ブラウザーのサイトデータを削除すると保存内容も消える場合があります。必要ならデータ管理からJSONを書き出してください。',footer:'Single HTML · 完全ローカル処理',emptyBuyTitle:'買うものはありません',emptyBuyBody:'定番を「少ない」「ない」にするか、上の入力欄から今回の品を追加してください。',emptyRegularTitle:'定番がありません',emptyRegularBody:'よく買うものを登録すると、次回から状態をタップするだけで買い物リストを作れます。',emptyHistoryTitle:'購入履歴はまだありません',emptyHistoryBody:'買い物画面でチェックした品がここに記録されます。',otherStore:'その他',unknownCategory:'未分類',statusLow:'少ない',statusOut:'ない',statusManual:'今回だけ',edit:'編集',delete:'削除',purchased:'購入済みにしました',undo:'元に戻す',undone:'元に戻しました',added:'追加しました',updated:'更新しました',removed:'削除しました',historyRemoved:'履歴を削除しました',regularCount:'{n}件の定番',alreadyNeeded:'すでに買い物リストにあります',historyCount:'{n}件',today:'今日',yesterday:'昨日',shareCopied:'共有リンクをコピーしました',shareFailed:'共有リンクをコピーできませんでした',shareNeedsWeb:'共有リンクは公開されたWebページ（http/https）で利用できます。ローカルHTMLでは共有できません。',sharedListTitle:'共有された買い物リストがあります',sharedSummary:'{n}件を受け取りました',dismiss:'閉じる',importShared:'今回のリストに追加',sharedImported:'共有リストを追加しました',exportTitle:'バックアップを書き出す',exportLead:'定番・履歴・設定をJSONとして保存します。',export:'保存',importTitle:'バックアップを読み込む',importLead:'この端末の現在データと置き換えます。',sampleBannerTitle:'サンプルデータを表示しています',sampleBannerLead:'使い方を確認できたら、サンプルだけ削除できます。',sampleClear:'サンプルデータをクリア',comboNoSuggestions:'候補はありません',regularSuggestion:'定番',resetTitle:'初期状態に戻す',resetLead:'定番・履歴・設定をサンプルへ戻します。',reset:'すべてリセット',exported:'バックアップを保存しました',imported:'バックアップを読み込みました',importFailed:'このJSONは読み込めませんでした',sampleCleared:'サンプルデータをクリアしました',confirmTitle:'確認',confirmAction:'実行する',clearHistoryConfirm:'購入履歴をすべて消去します。元に戻せません。',sampleClearConfirm:'サンプルの定番と購入履歴を空にします。',resetConfirm:'現在の定番・履歴・設定を消して、サンプル状態へ戻します。',deleteConfirm:'「{name}」を削除します。',historyDeleteConfirm:'この購入履歴を削除します。',noBuyToShare:'共有する買い物リストがありません'},
+    en:{brandMeta:'A replenishment list built around your regular items',introTitle:'Pick only what you need from your regulars.',lead:'Tap In stock, Low, or Out. The current shopping list fills itself with what you need now.',localBadge:'Fully local processing',metricBuy:'To buy',metricOut:'Out',metricLow:'Low',itemsUnit:'items',buyTitle:'To buy now',buyLead:'Regular items marked Low or Out and one-off additions are collected here.',share:'Share link',addItem:'+ Add',quickAddPlaceholder:'e.g. milk, tissues, batteries',quickAdd:'Add',regularTitle:'Regulars',regularLead:'No inventory counts. Just In stock, Low, or Out.',addRegular:'+ Add regular',filterAll:'All',stocked:'In stock',low:'Low',out:'Out',historyTitle:'Purchase history',historyLead:'Only checked purchases are recorded. Unneeded entries can be deleted one by one.',clearHistory:'Clear history',navBuy:'Buy',navRegular:'Regulars',navHistory:'History',itemName:'Item name',category:'Category',store:'Store',initialState:'Current state',regularFlag:'Keep as a regular item',yes:'Yes',no:'No (this time only)',cancel:'Cancel',save:'Save',close:'Close',helpTitle:'How to use & notes',manageTitle:'Data management',helpBasicsTitle:'Basics',helpStep1:'Add regular items, then tap Low or Out when something is running down at home.',helpStep2:'Those items automatically appear in To buy. While shopping, just check them off.',helpStep3:'A checked item returns to In stock and the history stays recorded.',helpPrivacyTitle:'Privacy',helpPrivacyBody:'Items, history, and settings are stored only in this browser. Processing is fully local and there are no runtime network requests.',helpShareTitle:'Sharing',helpShareBody:'Share link puts only the current shopping list after the URL #. Nothing is uploaded to a server. On supported browsers you can also open the native share sheet.',helpNotesTitle:'Notes',helpNoteStorage:'Clearing browser site data may remove saved data. Export a JSON backup from Data management when needed.',footer:'Single HTML · Fully local processing',emptyBuyTitle:'Nothing to buy',emptyBuyBody:'Mark a regular item Low or Out, or add a one-off item above.',emptyRegularTitle:'No regular items',emptyRegularBody:'Add things you buy often. Next time, a status tap is enough to build the list.',emptyHistoryTitle:'No purchase history yet',emptyHistoryBody:'Items checked in the shopping view are recorded here.',otherStore:'Other',unknownCategory:'Uncategorized',statusLow:'Low',statusOut:'Out',statusManual:'One-off',edit:'Edit',delete:'Delete',purchased:'Marked as purchased',undo:'Undo',undone:'Restored',added:'Added',updated:'Updated',removed:'Deleted',historyRemoved:'History entry deleted',regularCount:'{n} regular items',alreadyNeeded:'Already on the shopping list',historyCount:'{n} purchases',today:'Today',yesterday:'Yesterday',shareCopied:'Share link copied',shareFailed:'Could not copy the share link',shareNeedsWeb:'Share links are available on a published http/https page. They cannot be shared from a local HTML file.',sharedListTitle:'A shared shopping list is available',sharedSummary:'Received {n} items',dismiss:'Dismiss',importShared:'Add to my list',sharedImported:'Shared list added',exportTitle:'Export backup',exportLead:'Save regulars, history, and settings as JSON.',export:'Download',importTitle:'Import backup',importLead:'Replace current data on this device.',sampleBannerTitle:'Sample data is being shown',sampleBannerLead:'Once you understand the flow, you can clear only the sample data.',sampleClear:'Clear sample data',comboNoSuggestions:'No suggestions',regularSuggestion:'Regular',resetTitle:'Reset to sample',resetLead:'Replace regulars, history, and settings with the sample.',reset:'Reset everything',exported:'Backup downloaded',imported:'Backup imported',importFailed:'This JSON could not be imported',sampleCleared:'Sample data cleared',confirmTitle:'Confirm',confirmAction:'Continue',clearHistoryConfirm:'Delete all purchase history? This cannot be undone.',sampleClearConfirm:'Clear the sample regulars and purchase history?',resetConfirm:'Delete current regulars, history, and settings and restore the sample?',deleteConfirm:'Delete “{name}”?',historyDeleteConfirm:'Delete this purchase history entry?',noBuyToShare:'There is nothing to share'}
+  };
+  function tr(key,vars={}) { let s=translations[language]?.[key] ?? translations.en[key] ?? key; for(const [k,v] of Object.entries(vars)) s=s.replaceAll(`{${k}}`,String(v)); return s; }
+  function readStorage(key){try{return localStorage.getItem(key)}catch{return null}}
+  function writeStorage(key,value){try{localStorage.setItem(key,value)}catch{}}
+  function detectLanguage(){ if(APP_CONFIG.defaultLanguage==='ja'||APP_CONFIG.defaultLanguage==='en') return APP_CONFIG.defaultLanguage; return (navigator.language||'').toLowerCase().startsWith('ja')?'ja':'en'; }
+  function clone(v){return JSON.parse(JSON.stringify(v))}
+  function normalizeSettings(settings={}){return {...defaultSettings,...settings};}
+  function loadData(){ const raw=readStorage(storageKeys.data); if(!raw) return {items:clone(sampleData.items),history:clone(sampleData.history),settings:normalizeSettings(sampleData.settings)}; try{const parsed=JSON.parse(raw); if(!parsed||!Array.isArray(parsed.items)||!Array.isArray(parsed.history)) throw new Error(); return {items:parsed.items,history:parsed.history,settings:normalizeSettings(parsed.settings)};}catch{return {items:clone(sampleData.items),history:clone(sampleData.history),settings:normalizeSettings(sampleData.settings)}} }
+  function saveData(){ writeStorage(storageKeys.data,JSON.stringify(data)); }
+  function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  function displayName(item){ if(item.id && ['milk','eggs','bread','banana','yogurt','tissue','detergent','coffee'].includes(item.id)){ return language==='ja' ? (item.nameJa||item.name) : (item.nameEn||item.name); } return item.name; }
+  function displayText(value){ if(language==='ja') return value; const map={'スーパー':'Supermarket','ドラッグストア':'Drugstore','乳製品':'Dairy','パン':'Bakery','野菜・果物':'Produce','日用品':'Household','飲料':'Drinks','食品':'Groceries','肉・魚':'Meat & Fish','調味料':'Condiments','冷凍食品':'Frozen Foods'}; return map[value]||value; }
+  function uniqueValues(key){ return [...new Set(data.items.map(x=>x[key]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,language)); }
+  function formatDate(ts){ const d=new Date(ts); const t=new Date(); const start=new Date(t.getFullYear(),t.getMonth(),t.getDate()).getTime(); const day=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(); const diff=Math.round((start-day)/DAY); if(diff===0)return tr('today'); if(diff===1)return tr('yesterday'); return new Intl.DateTimeFormat(language==='ja'?'ja-JP':'en-US',{month:'short',day:'numeric',year:d.getFullYear()!==t.getFullYear()?'numeric':undefined}).format(d); }
+  function buyItems(){ return data.items.filter(i=>i.status==='low'||i.status==='out'||(!i.regular&&i.status==='buy')); }
+
+  const AppToast=(()=>{const root=$('#appToast'),message=$('#appToastMessage'),action=$('#appToastAction');let timer=0,handler=null;function dismiss(){clearTimeout(timer);root.classList.remove('show');handler=null;}function show({message:text='',actionLabel='',onAction=null,duration=3400}={}){clearTimeout(timer);message.textContent=text;handler=typeof onAction==='function'?onAction:null;action.textContent=actionLabel;action.hidden=!handler||!actionLabel;root.classList.add('show');if(duration>0)timer=setTimeout(dismiss,duration);return{dismiss};}action.addEventListener('click',()=>{const h=handler;dismiss();if(h)h();});return Object.freeze({show,dismiss});})();
+  window.AppToast=AppToast;
+  const AppConfirm=(()=>{const dialog=$('#appConfirmDialog'),title=$('#appConfirmTitle'),message=$('#appConfirmMessage'),cancel=$('#appConfirmCancel'),ok=$('#appConfirmOk'),close=$('#appConfirmClose');let resolver=null,restore=null;function finish(v){if(!dialog.open)return;const r=resolver;resolver=null;dialog.close();if(restore instanceof HTMLElement&&restore.isConnected)restore.focus({preventScroll:true});if(r)r(v);}function ask({title:heading,message:body,confirmLabel,cancelLabel,tone='default'}={}){if(dialog.open)finish(false);title.textContent=heading||tr('confirmTitle');message.textContent=body||'';cancel.textContent=cancelLabel||tr('cancel');ok.textContent=confirmLabel||tr('confirmAction');ok.classList.toggle('danger',tone==='danger');ok.classList.toggle('primary',tone!=='danger');restore=document.activeElement;return new Promise(resolve=>{resolver=resolve;dialog.showModal();requestAnimationFrame(()=>cancel.focus());});}close.onclick=cancel.onclick=()=>finish(false);ok.onclick=()=>finish(true);dialog.addEventListener('cancel',e=>{e.preventDefault();finish(false)});return Object.freeze({ask});})();
+  window.AppConfirm=AppConfirm;
+
+  const AppMobileBottomBar=(()=>{function mount(root,{initialPage='buy'}={}){const buttons=$$('.app-mobile-bottom-item');let current=initialPage;function showPage(keyOrId,{scroll=true}={}){const button=buttons.find(b=>b.dataset.mobileKey===keyOrId||b.dataset.mobilePageTarget===keyOrId);if(!button)return false;buttons.forEach(b=>{const active=b===button;b.classList.toggle('is-active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');const page=document.getElementById(b.dataset.mobilePageTarget);page?.classList.toggle('is-mobile-active',active);});current=button.dataset.mobileKey;if(scroll&&matchMedia('(max-width:600px)').matches)window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});return true;}root.addEventListener('click',e=>{const b=e.target.closest('[data-mobile-page-target]');if(b)showPage(b.dataset.mobileKey);});showPage(initialPage,{scroll:false});return Object.freeze({showPage,currentPage:()=>current});}return Object.freeze({mount});})();
+  window.AppMobileBottomBar=AppMobileBottomBar;
+  const mobileNav=AppMobileBottomBar.mount($('#appMobileBottomBar'),{initialPage:'buy'});
+
+  function applyLanguage(){
+    document.documentElement.lang=language; document.title=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name; $('#brandName').textContent=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name; $('#footerName').textContent=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name; $('#languageButton').textContent=language==='ja'?'EN':'日本語';
+    $$('[data-i18n]').forEach(el=>el.textContent=tr(el.dataset.i18n)); $$('[data-i18n-title]').forEach(el=>el.title=tr(el.dataset.i18nTitle)); $$('[data-i18n-aria-label]').forEach(el=>el.setAttribute('aria-label',tr(el.dataset.i18nAriaLabel))); $$('[data-i18n-placeholder]').forEach(el=>el.placeholder=tr(el.dataset.i18nPlaceholder)); if(sharedPayload) $('#sharedListSummary').textContent=tr('sharedSummary',{n:sharedPayload.items.length}); renderAll();
+  }
+  function renderAll(){ renderMetrics(); renderOptions(); renderBuy(); renderRegular(); renderHistory(); renderManage(); }
+  function renderMetrics(){ const buy=buyItems(); $('#metricBuy').innerHTML=`${buy.length}<small>${tr('itemsUnit')}</small>`; $('#metricOut').innerHTML=`${data.items.filter(i=>i.status==='out').length}<small>${tr('itemsUnit')}</small>`; $('#metricLow').innerHTML=`${data.items.filter(i=>i.status==='low').length}<small>${tr('itemsUnit')}</small>`; }
+  function renderOptions(){ const stores=uniqueValues('store'); $('#quickAddStore').innerHTML=stores.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(displayText(v))}</option>`).join('')+`<option value="">${tr('otherStore')}</option>`; $('#quickAddStore').value=data.settings.defaultStore&&stores.includes(data.settings.defaultStore)?data.settings.defaultStore:(stores[0]||''); renderComboMenu('category'); renderComboMenu('store'); }
+  function comboElements(kind){ return { root:$(`#item${kind==='category'?'Category':'Store'}Combo`), input:$(`#item${kind==='category'?'Category':'Store'}`), menu:$(`#item${kind==='category'?'Category':'Store'}Menu`) }; }
+  function comboValues(kind){ return uniqueValues(kind); }
+  function closeCombo(kind){ const {root}=comboElements(kind); root?.classList.remove('is-open'); }
+  function closeAllCombos(){ closeCombo('category'); closeCombo('store'); }
+  function renderComboMenu(kind){ const {root,input,menu}=comboElements(kind); if(!root||!input||!menu) return; const query=(input.value||'').trim().toLowerCase(); const values=comboValues(kind).filter(v=>!query || v.toLowerCase().includes(query)); if(!values.length){ menu.innerHTML=`<div class="combo-empty">${escapeHtml(tr('comboNoSuggestions'))}</div>`; return; } menu.innerHTML=values.map(v=>`<button class="combo-option" type="button" data-combo-select="${kind}" data-value="${escapeHtml(v)}">${escapeHtml(displayText(v))}</button>`).join(''); }
+  function openCombo(kind){ closeAllCombos(); renderComboMenu(kind); const {root}=comboElements(kind); root?.classList.add('is-open'); }
+  function quickDictionaryLabel(entry){ return language==='ja'?entry.ja:entry.en; }
+  function quickSuggestionMatches(query){
+    const q=query.trim().toLowerCase(); if(!q) return [];
+    const existingLabels=new Set(data.items.map(i=>displayName(i).toLowerCase()));
+    const regulars=data.items.filter(i=>i.regular&&displayName(i).toLowerCase().includes(q)).map(item=>({kind:'regular',itemId:item.id,label:displayName(item),category:item.category||'',meta:tr('regularSuggestion')}));
+    const builtins=quickItemDictionary.filter(entry=>{const ja=entry.ja.toLowerCase(),en=entry.en.toLowerCase();return (ja.includes(q)||en.includes(q))&&!existingLabels.has(quickDictionaryLabel(entry).toLowerCase());}).map(entry=>({kind:'dictionary',entry,label:quickDictionaryLabel(entry),category:entry.category,meta:displayText(entry.category)}));
+    return [...regulars,...builtins].slice(0,6);
+  }
+  let quickSuggestionItems=[]; let quickSuggestionIndex=-1; let selectedQuickSuggestion=null;
+  function closeQuickSuggestions(){const menu=$('#quickNameSuggestions'),input=$('#quickAddName');menu.classList.remove('is-open');menu.innerHTML='';input.setAttribute('aria-expanded','false');quickSuggestionItems=[];quickSuggestionIndex=-1;}
+  function renderQuickSuggestions(){
+    const input=$('#quickAddName'),menu=$('#quickNameSuggestions'); const matches=quickSuggestionMatches(input.value); quickSuggestionItems=matches; quickSuggestionIndex=-1;
+    if(!matches.length){closeQuickSuggestions();return;}
+    menu.innerHTML=matches.map((candidate,index)=>`<button class="quick-suggest-option" type="button" role="option" data-quick-index="${index}"><span class="quick-suggest-name">${escapeHtml(candidate.label)}</span><span class="quick-suggest-meta">${escapeHtml(candidate.meta)}</span></button>`).join('');
+    menu.classList.add('is-open'); input.setAttribute('aria-expanded','true');
+  }
+  function chooseQuickSuggestion(index){const candidate=quickSuggestionItems[index];if(!candidate)return;selectedQuickSuggestion=candidate;$('#quickAddName').value=candidate.label;closeQuickSuggestions();$('#quickAddName').focus();}
+  function setQuickSuggestionActive(index){const options=$$('#quickNameSuggestions .quick-suggest-option');if(!options.length)return;quickSuggestionIndex=(index+options.length)%options.length;options.forEach((el,i)=>el.classList.toggle('is-active',i===quickSuggestionIndex));options[quickSuggestionIndex]?.scrollIntoView({block:'nearest'});}
+  function emptyHtml(title,body){return `<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v13H5zM8 4h8v5H8z"/><path d="M9 13h6"/></svg><strong>${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></div>`}
+  function renderBuy(){ const items=buyItems(); const root=$('#buyList'); if(!items.length){root.innerHTML=emptyHtml(tr('emptyBuyTitle'),tr('emptyBuyBody'));return;} const groups=new Map(); for(const item of items){const store=item.store||tr('otherStore');if(!groups.has(store))groups.set(store,[]);groups.get(store).push(item);} root.innerHTML=[...groups.entries()].map(([store,list])=>`<div class="buy-group"><div class="group-head"><span>${escapeHtml(displayText(store))}</span><span>${list.length}</span></div>${list.map(item=>`<div class="dense-row" data-item-id="${item.id}"><input class="purchase-check" type="checkbox" data-action="purchase" aria-label="${escapeHtml(displayName(item))}"><div class="row-main"><div class="row-title-line"><span class="row-name">${escapeHtml(displayName(item))}</span><span class="status-pill ${item.regular?item.status:'manual'}">${escapeHtml(item.regular?(item.status==='out'?tr('statusOut'):tr('statusLow')):tr('statusManual'))}</span></div><div class="row-meta">${escapeHtml(displayText(item.category)||tr('unknownCategory'))}</div></div><button class="button ghost small icon-only" type="button" data-action="edit" aria-label="${tr('edit')}" title="${tr('edit')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 20 4-.8L18.5 8.7l-3.2-3.2L4.8 16zM13.8 7l3.2 3.2"/></svg></button></div>`).join('')}</div>`).join(''); }
+  function renderRegular(){ const root=$('#regularList'); const items=data.items.filter(i=>i.regular&& (regularFilter==='all'||i.status===regularFilter)); $('#regularCount').textContent=tr('regularCount',{n:data.items.filter(i=>i.regular).length}); if(!items.length){root.innerHTML=emptyHtml(tr('emptyRegularTitle'),tr('emptyRegularBody'));return;} const groups=new Map(); for(const item of items){const c=item.category||tr('unknownCategory');if(!groups.has(c))groups.set(c,[]);groups.get(c).push(item);} root.innerHTML=[...groups.entries()].map(([cat,list])=>`<div><div class="group-head"><span>${escapeHtml(displayText(cat))}</span><span>${list.length}</span></div>${list.map(item=>`<div class="dense-row regular-row" data-item-id="${item.id}"><div class="row-main"><div class="row-name">${escapeHtml(displayName(item))}</div><div class="row-meta">${escapeHtml(displayText(item.store)||tr('otherStore'))}</div></div><div class="state-control" role="group" aria-label="${escapeHtml(displayName(item))}">${['stocked','low','out'].map(state=>`<button class="state-button ${item.status===state?'is-active':''}" type="button" data-action="state" data-state="${state}">${escapeHtml(tr(state))}</button>`).join('')}</div><div class="row-actions"><button class="button ghost small icon-only" type="button" data-action="edit" aria-label="${tr('edit')}" title="${tr('edit')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 20 4-.8L18.5 8.7l-3.2-3.2L4.8 16zM13.8 7l3.2 3.2"/></svg></button></div></div>`).join('')}</div>`).join(''); }
+  function renderHistory(){ const root=$('#historyList'); if(!data.history.length){root.innerHTML=emptyHtml(tr('emptyHistoryTitle'),tr('emptyHistoryBody'));return;} const sorted=[...data.history].sort((a,b)=>b.at-a.at); const groups=new Map(); for(const h of sorted){const d=new Date(h.at);const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;if(!groups.has(key))groups.set(key,{label:formatDate(h.at),items:[]});groups.get(key).items.push(h);} root.innerHTML=[...groups.values()].map(g=>`<div class="history-day"><div class="history-date">${escapeHtml(g.label)}</div>${g.items.map(h=>`<div class="history-entry" data-history-id="${h.id}"><div class="history-entry-main"><div class="history-name">${escapeHtml(historyDisplayName(h))}</div><div class="history-meta">${escapeHtml(displayText(h.store)||tr('otherStore'))}</div></div><time class="history-time">${new Intl.DateTimeFormat(language==='ja'?'ja-JP':'en-US',{hour:'2-digit',minute:'2-digit'}).format(new Date(h.at))}</time><button class="button ghost small icon-only" type="button" data-action="delete-history" aria-label="${tr('delete')}" title="${tr('delete')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div>`).join('')}</div>`).join(''); }
+  function renderManage(){ const banner=$('#sampleDataBanner'); if(banner) banner.hidden=data.settings.sampleDataVisible===false; }
+  function historyDisplayName(h){ const item=data.items.find(i=>i.id===h.itemId); return item?displayName(item):h.name; }
+  function setItemState(id,status){ const item=data.items.find(i=>i.id===id); if(!item)return; item.status=status; saveData(); renderAll(); }
+  function purchaseItem(id){ const item=data.items.find(i=>i.id===id); if(!item)return; const before=clone(item); const history={id:uid(),itemId:item.id,name:displayName(item),store:item.store||'',at:Date.now()}; data.history.push(history); if(item.regular)item.status='stocked';else data.items=data.items.filter(i=>i.id!==id); saveData(); renderAll(); AppToast.show({message:tr('purchased'),actionLabel:tr('undo'),duration:5000,onAction:()=>{data.history=data.history.filter(h=>h.id!==history.id); const existing=data.items.find(i=>i.id===id); if(existing)Object.assign(existing,before); else data.items.push(before);saveData();renderAll();AppToast.show({message:tr('undone')});}}); }
+  async function deleteHistoryEntry(id){ const entry=data.history.find(h=>h.id===id); if(!entry) return; if(!await AppConfirm.ask({message:tr('historyDeleteConfirm'),tone:'danger'})) return; const before=clone(entry); data.history=data.history.filter(h=>h.id!==id); saveData(); renderAll(); AppToast.show({message:tr('historyRemoved'),actionLabel:tr('undo'),duration:5000,onAction:()=>{data.history.push(before); saveData(); renderAll();}}); }
+  function openItemDialog(item=null,{regularDefault=true}={}){ $('#editItemId').value=item?.id||''; $('#deleteItemButton').hidden=!item; $('#itemDialogTitle').textContent=item?tr('edit'):tr(regularDefault?'addRegular':'addItem'); $('#itemName').value=item?displayName(item):''; $('#itemCategory').value=item?.category||''; $('#itemStore').value=item?.store||data.settings.defaultStore||''; $('#itemState').value=item?.regular?(item.status||'stocked'):'low'; $('#itemRegular').value=item?(item.regular?'yes':'no'):(regularDefault?'yes':'no'); $('#itemDialog').showModal(); requestAnimationFrame(()=>$('#itemName').focus()); }
+  async function deleteItem(item){ if(!await AppConfirm.ask({message:tr('deleteConfirm',{name:displayName(item)}),tone:'danger'}))return; const before=clone(item); data.items=data.items.filter(i=>i.id!==item.id);saveData();renderAll();AppToast.show({message:tr('removed'),actionLabel:tr('undo'),duration:5000,onAction:()=>{data.items.push(before);saveData();renderAll();}}); }
+  function normalizedFilenameBase(){const input=$('#outputFilename');const fallback='restock-list-backup';const cleaned=input.value.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g,'-').replace(/\.+$/g,'').trim();let base=cleaned.replace(/\.json$/i,'')||fallback;if(/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(base))base=`${base}-file`;input.value=base;return base.slice(0,120);}
+  function exportData(){const payload={schema:'restock-list-backup',version:1,exportedAt:new Date().toISOString(),data};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${normalizedFilenameBase()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),0);AppToast.show({message:tr('exported')});}
+  async function importDataFile(file){try{const parsed=JSON.parse(await file.text());const next=parsed.data||parsed;if(!next||!Array.isArray(next.items)||!Array.isArray(next.history))throw new Error();data={items:next.items,history:next.history,settings:normalizeSettings(next.settings)};saveData();renderAll();$('#manageDialog').close();AppToast.show({message:tr('imported')});}catch{AppToast.show({message:tr('importFailed')});}}
+  function bytesToBase64Url(bytes){let bin='';const chunk=0x8000;for(let i=0;i<bytes.length;i+=chunk)bin+=String.fromCharCode(...bytes.subarray(i,i+chunk));return btoa(bin).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');}
+  function base64UrlToBytes(value){let b64=value.replaceAll('-','+').replaceAll('_','/');while(b64.length%4)b64+='=';const bin=atob(b64);return Uint8Array.from(bin,c=>c.charCodeAt(0));}
+  async function gzipBytes(bytes){if(typeof CompressionStream!=='function')throw new Error('CompressionStream unavailable');const stream=new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));return new Uint8Array(await new Response(stream).arrayBuffer());}
+  async function gunzipBytes(bytes){if(typeof DecompressionStream!=='function')throw new Error('DecompressionStream unavailable');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return new Uint8Array(await new Response(stream).arrayBuffer());}
+  async function encodeShare(items){const compact=items.map(i=>[displayName(i),i.store||'',i.category||'']);const raw=new TextEncoder().encode(JSON.stringify(compact));try{return `2.${bytesToBase64Url(await gzipBytes(raw))}`;}catch{return `1.${bytesToBase64Url(raw)}`;}}
+  async function decodeShare(value){if(value.startsWith('2.')){const compressed=base64UrlToBytes(value.slice(2));const rows=JSON.parse(new TextDecoder().decode(await gunzipBytes(compressed)));if(!Array.isArray(rows))throw new Error();return {v:2,items:rows.map(row=>({name:String(row?.[0]??''),store:String(row?.[1]??''),category:String(row?.[2]??'')})).filter(i=>i.name)};}if(value.startsWith('1.')){const rows=JSON.parse(new TextDecoder().decode(base64UrlToBytes(value.slice(2))));if(!Array.isArray(rows))throw new Error();return {v:1,items:rows.map(row=>({name:String(row?.[0]??''),store:String(row?.[1]??''),category:String(row?.[2]??'')})).filter(i=>i.name)};}const parsed=JSON.parse(new TextDecoder().decode(base64UrlToBytes(value)));if(!parsed||!Array.isArray(parsed.items))throw new Error();return parsed;}
+  async function shareCurrent(){const items=buyItems();if(!items.length){AppToast.show({message:tr('noBuyToShare')});return;}if(!/^https?:$/.test(location.protocol)){AppToast.show({message:tr('shareNeedsWeb')});return;}const encoded=await encodeShare(items);const url=`${location.href.split('#')[0]}#list=${encoded}`;const shareText=`${language==='ja'?'買い物リスト':'Shopping list'}
+${url}`;if(navigator.share){try{await navigator.share({title:document.title,text:shareText});return;}catch(error){if(error&&error.name==='AbortError')return;}}try{await navigator.clipboard.writeText(url);AppToast.show({message:tr('shareCopied')});}catch{const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();AppToast.show({message:tr(ok?'shareCopied':'shareFailed')});}}
+  async function inspectShareHash(){const m=location.hash.match(/^#list=(.+)$/);if(!m)return;try{sharedPayload=await decodeShare(m[1]);$('#sharedListBanner').classList.add('is-visible');$('#sharedListSummary').textContent=tr('sharedSummary',{n:sharedPayload.items.length});}catch{}}
+  function importShared(){if(!sharedPayload)return;for(const incoming of sharedPayload.items){const match=data.items.find(i=>i.name===incoming.name||i.nameJa===incoming.name||i.nameEn===incoming.name||displayName(i)===incoming.name);if(match){if(match.regular)match.status='low';else match.status='buy';continue;}data.items.push({id:uid(),name:incoming.name,category:incoming.category||'',store:incoming.store||'',status:'buy',regular:false,createdAt:Date.now()});}saveData();renderAll();sharedPayload=null;$('#sharedListBanner').classList.remove('is-visible');history.replaceState(null,'',location.href.split('#')[0]);AppToast.show({message:tr('sharedImported')});}
+
+  $('#quickAddName').addEventListener('input',()=>{selectedQuickSuggestion=null;renderQuickSuggestions();});
+  $('#quickAddName').addEventListener('keydown',e=>{if(!quickSuggestionItems.length)return;if(e.key==='ArrowDown'){e.preventDefault();setQuickSuggestionActive(quickSuggestionIndex+1);}else if(e.key==='ArrowUp'){e.preventDefault();setQuickSuggestionActive(quickSuggestionIndex-1);}else if(e.key==='Enter'&&quickSuggestionIndex>=0){e.preventDefault();chooseQuickSuggestion(quickSuggestionIndex);}else if(e.key==='Escape'){closeQuickSuggestions();}});
+  $('#quickNameSuggestions').addEventListener('mousedown',e=>{const option=e.target.closest('[data-quick-index]');if(!option)return;e.preventDefault();chooseQuickSuggestion(Number(option.dataset.quickIndex));});
+  $('#quickAddName').addEventListener('blur',()=>setTimeout(closeQuickSuggestions,120));
+  ['category','store'].forEach(kind=>{ const {root,input}=comboElements(kind); if(!root||!input) return; const toggle=root.querySelector('.combo-button'); toggle?.addEventListener('click',()=>{ if(root.classList.contains('is-open')) closeCombo(kind); else { openCombo(kind); input.focus(); } }); input.addEventListener('focus',()=>{ renderComboMenu(kind); }); input.addEventListener('input',()=>{ if(root.classList.contains('is-open')) renderComboMenu(kind); }); input.addEventListener('keydown',e=>{ if(e.key==='ArrowDown'){ e.preventDefault(); openCombo(kind); root.querySelector('.combo-option')?.focus(); } if(e.key==='Escape') closeCombo(kind); }); root.addEventListener('click',e=>{ const option=e.target.closest('[data-combo-select]'); if(!option) return; input.value=option.dataset.value||''; closeCombo(kind); input.focus(); }); });
+  document.addEventListener('click',e=>{ if(!e.target.closest('.combo')) closeAllCombos(); });
+  $('#languageButton').addEventListener('click',()=>{language=language==='ja'?'en':'ja';writeStorage(storageKeys.language,language);applyLanguage();});
+  $('#helpButton').onclick=()=>$('#helpDialog').showModal(); $('#closeHelpButton').onclick=()=>$('#helpDialog').close();
+  $('#manageButton').onclick=()=>$('#manageDialog').showModal(); $('#closeManageButton').onclick=()=>$('#manageDialog').close();
+  $('#openAddButton').onclick=()=>openItemDialog(null,{regularDefault:false}); $('#addRegularButton').onclick=()=>openItemDialog(null,{regularDefault:true}); $('#closeItemDialog').onclick=$('#cancelItemButton').onclick=()=>$('#itemDialog').close(); $('#deleteItemButton').onclick=async()=>{const item=data.items.find(i=>i.id===$('#editItemId').value); if(item){$('#itemDialog').close(); await deleteItem(item);}};
+  $('#quickAddForm').addEventListener('submit',e=>{e.preventDefault();const name=$('#quickAddName').value.trim();if(!name)return;const selected=selectedQuickSuggestion&&selectedQuickSuggestion.label===name?selectedQuickSuggestion:null;if(selected?.kind==='regular'){const item=data.items.find(i=>i.id===selected.itemId);if(item)item.status='low';}else{data.items.push({id:uid(),name,category:selected?.kind==='dictionary'?(selected.entry.category||''):'',store:$('#quickAddStore').value||'',status:'buy',regular:false,createdAt:Date.now()});data.settings.defaultStore=$('#quickAddStore').value||data.settings.defaultStore;}$('#quickAddName').value='';selectedQuickSuggestion=null;closeQuickSuggestions();saveData();renderAll();AppToast.show({message:tr('added')});});
+  $('#itemForm').addEventListener('submit',e=>{e.preventDefault();const id=$('#editItemId').value;const name=$('#itemName').value.trim();if(!name)return;const regular=$('#itemRegular').value==='yes';const existing=data.items.find(i=>i.id===id);if(existing){existing.name=name;existing.nameJa=undefined;existing.nameEn=undefined;existing.category=$('#itemCategory').value.trim();existing.store=$('#itemStore').value.trim();existing.regular=regular;existing.status=regular?$('#itemState').value:'buy';}else{data.items.push({id:uid(),name,category:$('#itemCategory').value.trim(),store:$('#itemStore').value.trim(),regular,status:regular?$('#itemState').value:'buy',createdAt:Date.now()});}data.settings.defaultStore=$('#itemStore').value.trim()||data.settings.defaultStore;saveData();renderAll();$('#itemDialog').close();AppToast.show({message:tr(existing?'updated':'added')});});
+  $('#buyList').addEventListener('click',e=>{const row=e.target.closest('[data-item-id]');if(!row)return;const id=row.dataset.itemId;const action=e.target.closest('[data-action]')?.dataset.action;if(action==='purchase')purchaseItem(id);if(action==='edit')openItemDialog(data.items.find(i=>i.id===id),{regularDefault:false});});
+  $('#regularList').addEventListener('click',e=>{const row=e.target.closest('[data-item-id]');if(!row)return;const id=row.dataset.itemId;const item=data.items.find(i=>i.id===id);const target=e.target.closest('[data-action]');if(!target)return;if(target.dataset.action==='state')setItemState(id,target.dataset.state);if(target.dataset.action==='edit')openItemDialog(item);});
+  $('#statusFilters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;regularFilter=b.dataset.filter;$$('#statusFilters .filter-button').forEach(x=>x.classList.toggle('is-active',x===b));renderRegular();});
+  $('#shareButton').onclick=shareCurrent; $('#dismissSharedButton').onclick=()=>{$('#sharedListBanner').classList.remove('is-visible');sharedPayload=null;}; $('#importSharedButton').onclick=importShared;
+  $('#historyList').addEventListener('click',e=>{const button=e.target.closest('[data-action="delete-history"]'); if(!button) return; const row=button.closest('[data-history-id]'); if(row) deleteHistoryEntry(row.dataset.historyId);});
+  $('#clearHistoryButton').onclick=async()=>{if(!data.history.length)return;if(await AppConfirm.ask({message:tr('clearHistoryConfirm'),tone:'danger'})){data.history=[];saveData();renderAll();}};
+  $('#exportButton').onclick=exportData; $('#outputFilename').addEventListener('blur',normalizedFilenameBase); $('#importFile').addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importDataFile(f);e.target.value='';});
+  $('#clearSampleTopButton').onclick=async()=>{if(await AppConfirm.ask({message:tr('sampleClearConfirm'),tone:'danger'})){data.items=[]; data.history=[]; data.settings=normalizeSettings({...data.settings,sampleDataVisible:false}); saveData(); renderAll(); AppToast.show({message:tr('sampleCleared')});}};
+  $('#resetButton').onclick=async()=>{if(await AppConfirm.ask({message:tr('resetConfirm'),tone:'danger'})){data={items:clone(sampleData.items),history:clone(sampleData.history),settings:normalizeSettings(sampleData.settings)};saveData();renderAll();$('#manageDialog').close();}};
+  [$('#helpDialog'),$('#manageDialog'),$('#itemDialog')].forEach(dialog=>dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}));
+  $('#versionBadge').textContent=`v${APP_CONFIG.version}`;
+  applyLanguage();
+  inspectShareHash();
+})();
+</script>
+</body>
+</html>

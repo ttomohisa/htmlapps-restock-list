@@ -1,0 +1,26 @@
+{
+  "$schema": "./schemas/app-config.schema.json",
+  "name": "Restock List",
+  "nameJa": "Restock List",
+  "slug": "restock-list",
+  "version": "1.0.0",
+  "description": "A local-first shopping list that turns regular items into a lightweight restock workflow.",
+  "descriptionJa": "定番品を「ある・少ない・ない」で管理する、完全ローカル処理のシンプルな買い物リストです。",
+  "defaultLanguage": "auto",
+  "repository": {
+    "owner": "ttomohisa",
+    "name": "htmlapps-restock-list"
+  },
+  "build": {
+    "output": "dist/index.html",
+    "blockRuntimeNetwork": true,
+    "selfExtract": {
+      "enabled": true,
+      "output": "dist/index.self-extract.html"
+    },
+    "sizeBudget": {
+      "readableWarningMb": 2,
+      "selfExtractWarningMb": 1
+    }
+  }
+}
