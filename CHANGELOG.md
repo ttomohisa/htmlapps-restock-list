@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added a session-only shopping-store filter with All stores, Unassigned, and collision-safe named stores.
+- Kept selected stores stable through purchases, Undo, edits, language changes, and tab navigation, including an empty-store recovery action.
+- Made all-store sharing and summary scope explicit while filtering.
+- Added dependency-free Node runtime regression tests to repository verification.
+
 ## 1.0.0
 
 - Initial Restock List release based on the Browser Kitty single-HTML template.

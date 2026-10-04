@@ -29,7 +29,12 @@ The app is intentionally local-first, account-free, and useful as a single HTML 
 - Maintain regular items with name, category, store, and one of three states: `stocked`, `low`, `out`.
 - Support one-off shopping items that do not remain in the regular master.
 - Automatically collect Low, Out, and one-off items in the shopping view.
-- Group shopping items by store and regular items by category.
+- Group shopping items by raw store identity and regular items by category.
+- Filter the shopping view with a labeled native selector: All stores, Unassigned, and named stores. Named stores include those currently stocked; display labels never determine filter identity.
+- Keep the selected filter for the current page session across purchases, Undo, edits, language changes, and tab navigation. Do not persist it in localStorage or backups.
+- Keep a selected store visible even when its last shopping item disappears; show a store-specific empty state with a Show all stores action.
+- Keep global summary counts and shared links scoped to all stores. While filtering, label sharing as Share all stores and show the scope beside the selector.
+- Reset the filter on reload, successful full JSON replacement, sample clearing, and reset; invalid imports leave it intact.
 - Mark shopping items purchased with one tap.
 - Purchase action must be reversible through the reusable Undo toast.
 - Record purchase timestamp, item ID/name, and store locally.
@@ -124,6 +129,8 @@ Current stable Chromium, Firefox, and Safari on desktop and mobile. Direct `file
 - Setting a regular item Low/Out adds it to the Buy page immediately.
 - Purchasing a regular item returns it to In stock, records history, and offers Undo.
 - Purchasing a one-off item removes it and records history.
+- Store filters distinguish blank, named, translated, HTML-special, and reserved-label store names without changing item data.
+- Purchasing or deleting the last item in a filtered store keeps its empty view; Undo restores the item under the same filter.
 - JSON export has an editable safe filename and JSON import restores valid backups.
 - Japanese and English both fit at 360px width.
 - The mobile bottom navigation switches the three workflow pages rather than merely scrolling to them.

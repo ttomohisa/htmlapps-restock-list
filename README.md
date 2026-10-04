@@ -21,6 +21,7 @@ GitHub Pages delivers the initial HTML. After it loads, item management, purchas
 ## Features
 
 - **Build the list from regular items** — Mark a regular item In stock, Low, or Out instead of recreating the same shopping list every time.
+- **Focus on one store** — Choose All stores, Unassigned, or a named store. The filter stays in place while checking off items and using Undo, and clears on reload or full data replacement.
 - **Shop from one compact screen** — Low, Out, and one-off items are grouped by store with a dense, mobile-friendly layout.
 - **Add items quickly** — Type a product name and pick from built-in everyday-item suggestions or your existing regular items.
 - **Reuse categories and stores** — Category and store fields accept free text while also letting you reopen and select previously used values.
@@ -49,6 +50,8 @@ On Windows 10/11:
 build-standalone.bat
 ```
 
+With Node.js 20 or newer installed, run `node --test tests/store-filter.test.mjs` for the focused runtime suite, or `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1` for tests and both verified builds.
+
 The generated files are written to `dist/`. Edit `src/index.template.html`, not the generated HTML directly.
 
 ## Usage
@@ -56,14 +59,14 @@ The generated files are written to `dist/`. Edit `src/index.template.html`, not 
 1. Review the sample data, then use **Clear sample data** when you are ready to start with an empty list.
 2. Add frequently purchased items under **Regulars**.
 3. Change each regular item between **In stock / Low / Out**.
-4. Items marked Low or Out automatically appear under **To buy now**.
+4. Items marked Low or Out automatically appear under **To buy now**. Use **Filter by store** to focus on your current stop.
 5. Add one-off items directly from the quick-add field. Typing shows built-in product suggestions and matching regular items.
 6. Check an item when purchased. Regular items return to In stock; one-off items leave the active list.
 7. Review or delete entries under **Purchase history** when needed.
 
 ### Share links
 
-The **Share link** action includes only the current shopping list — item name, store, and category. Regular-item states outside the active list, purchase history, and settings are not included.
+The **Share link** action always includes the current shopping list from all stores, even while filtered. The button reads **Share all stores** when a filter is active. It includes only the shopping list — item name, store, and category. Regular-item states outside the active list, purchase history, and settings are not included.
 
 New share links use a compact row format, gzip compression, and Base64URL encoding inside the URL fragment (`#list=...`). If gzip compression is unavailable, the app falls back to an uncompressed compact format. Older uncompressed links remain readable.
 
