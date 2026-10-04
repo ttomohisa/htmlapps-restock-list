@@ -142,6 +142,10 @@ if ([string]::IsNullOrWhiteSpace([string]$app.name)) { throw "app.config.json: n
 if ([string]::IsNullOrWhiteSpace([string]$app.slug)) { throw "app.config.json: slug is required" }
 if ([string]::IsNullOrWhiteSpace([string]$app.version)) { throw "app.config.json: version is required" }
 
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js 20 or newer is required for runtime regression tests." }
+& node --test (Join-Path $Root "tests\store-filter.test.mjs")
+if ($LASTEXITCODE -ne 0) { throw "Store-filter runtime regression tests failed." }
+
 $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
