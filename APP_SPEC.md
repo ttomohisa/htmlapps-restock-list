@@ -35,6 +35,11 @@ The app is intentionally local-first, account-free, and useful as a single HTML 
 - Keep a selected store visible even when its last shopping item disappears; show a store-specific empty state with a Show all stores action.
 - Keep global summary counts and shared links scoped to all stores. While filtering, label sharing as Share all stores and show the scope beside the selector.
 - Reset the filter on reload, successful full JSON replacement, sample clearing, and reset; invalid imports leave it intact.
+- Provide a localized **Copy visible list** button beside the store selector. Copy only the visible Low, Out, and one-off items, using the current display language, raw-store group identity, and the same store/item ordering as the shopping view.
+- Copy plain text as store headings followed by `- item` lines, separated by blank lines between groups. Preserve Unicode and literal HTML-looking text. Temporarily disable copying while its clipboard operation is pending. Disable copying when the filtered view is empty, including after its last purchase; Undo restores availability.
+- Capture the text at click time. Later filter, language, or item changes must not change an in-flight copy snapshot. Copying never changes data, settings, history, or persistence. Delayed feedback must not replace a newer action’s Undo toast.
+- Use the asynchronous clipboard API when available, with a local selection fallback. Handle unavailable APIs, rejection, false results, and exceptions with truthful localized feedback; always remove temporary selection elements and restore focus without stealing a newer focus target.
+- Keep existing native sharing and all-store URL payload behavior unchanged. Local `file://` pages may copy visible plain text even though URL sharing remains unavailable.
 - Mark shopping items purchased with one tap.
 - Purchase action must be reversible through the reusable Undo toast.
 - Record purchase timestamp, item ID/name, and store locally.
@@ -57,7 +62,7 @@ The app is intentionally local-first, account-free, and useful as a single HTML 
 - No server-side storage, login, analytics, telemetry, or runtime API requests.
 - CSP must retain `connect-src 'none'`.
 - Share links put a compact shopping-list snapshot in the URL fragment. New links use compact arrays + gzip + Base64URL (`#list=2...`); the decoder keeps backward compatibility with the previous uncompressed format. The fragment is not sent by normal HTTP navigation and the app itself performs no request.
-- JSON export/import happens only after explicit user action.
+- JSON export/import and clipboard writes happen only after explicit user action. Plain-text copying stays local; pasting it into another app is up to the user.
 
 ## 6. Data model
 
@@ -131,6 +136,8 @@ Current stable Chromium, Firefox, and Safari on desktop and mobile. Direct `file
 - Purchasing a one-off item removes it and records history.
 - Store filters distinguish blank, named, translated, HTML-special, and reserved-label store names without changing item data.
 - Purchasing or deleting the last item in a filtered store keeps its empty view; Undo restores the item under the same filter.
+- Visible-list copying respects exact named/unassigned store filters and translated-name collisions, and remains a click-time snapshot if a clipboard fallback is delayed.
+- Both list and link copying report failures without an unhandled rejection or leftover textarea.
 - JSON export has an editable safe filename and JSON import restores valid backups.
 - Japanese and English both fit at 360px width.
 - The mobile bottom navigation switches the three workflow pages rather than merely scrolling to them.
@@ -142,5 +149,5 @@ The upper-right help dialog explains:
 - the three-state regular-item workflow,
 - purchase-history recording and deletion,
 - local-only privacy behavior,
-- fragment-based sharing,
+- visible-list plain-text copying and all-store fragment-based sharing,
 - browser-storage loss risk and JSON backup.

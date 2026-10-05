@@ -22,6 +22,7 @@ GitHub Pages delivers the initial HTML. After it loads, item management, purchas
 
 - **Build the list from regular items** — Mark a regular item In stock, Low, or Out instead of recreating the same shopping list every time.
 - **Focus on one store** — Choose All stores, Unassigned, or a named store. The filter stays in place while checking off items and using Undo, and clears on reload or full data replacement.
+- **Copy the visible list** — Use Copy visible list beside the store filter to copy plain text grouped by store, ready to paste into a message or note. It copies the clicked view in the selected language, including one-off items, and is disabled when that view is empty.
 - **Shop from one compact screen** — Low, Out, and one-off items are grouped by store with a dense, mobile-friendly layout.
 - **Add items quickly** — Type a product name and pick from built-in everyday-item suggestions or your existing regular items.
 - **Reuse categories and stores** — Category and store fields accept free text while also letting you reopen and select previously used values.
@@ -50,11 +51,13 @@ On Windows 10/11:
 build-standalone.bat
 ```
 
-With Node.js 20 or newer installed, run `node --test tests/store-filter.test.mjs` for the focused runtime suite, or `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1` for tests and both verified builds.
+With Node.js 20 or newer installed, run `node --test tests/*.test.mjs` for the store-filter and clipboard runtime suites, or `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1` for tests and both verified builds.
 
-The generated files are written to `dist/`. Edit `src/index.template.html`, not the generated HTML directly.
+The generated files are written to `dist/`. After building, copy `dist/index.html` to `restock-list.html` to refresh the checked-in readable download. Edit `src/index.template.html`, not the generated HTML directly.
 
 ## Usage
+
+Choose a store, then **Copy visible list** to copy only the displayed items. Plain-text copying also works from a local HTML file when your browser allows it. A failed copy shows a message; your shopping data is unchanged. **Share link** still includes every store regardless of the filter.
 
 1. Review the sample data, then use **Clear sample data** when you are ready to start with an empty list.
 2. Add frequently purchased items under **Regulars**.

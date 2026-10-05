@@ -1,32 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import vm from 'node:vm';
-import { webcrypto } from 'node:crypto';
-
-const html = readFileSync(new URL('../src/index.template.html', import.meta.url), 'utf8');
-const runtime = html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
-// Run the real application in a small DOM adapter; browser layout/keyboard QA is separate.
-function app(items = fixtures()) {
-  const nodes = new Map();
-  class Element {
-    constructor() { this.value = ''; this.innerHTML = ''; this.textContent = ''; this.dataset = {}; this.hidden = false; this.events = {}; this.open = false; this.isConnected = true; this.classList = { add() {}, remove() {}, toggle() {}, contains: () => false }; }
-    addEventListener(type, fn) { (this.events[type] ||= []).push(fn); }
-    dispatch(type, target = this) { for (const fn of this.events[type] || []) fn({ target, preventDefault() {} }); }
-    setAttribute() {} removeAttribute() {} querySelector() { return null; } focus() {} showModal() { this.open = true; } close() { this.open = false; }
-  }
-  const node = selector => { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); };
-  const tabs = ['buy', 'regular', 'history'].map(key => { const button = new Element(); button.dataset = { mobileKey: key, mobilePageTarget: `${key}Page` }; return button; });
-  const saved = new Map([['restock-list:language', 'en'], ['restock-list:data', JSON.stringify({ items, history: [], settings: { defaultStore: '', sampleDataVisible: false } })]]);
-  for (const [id, value] of Object.entries({ 'app-config': { slug: 'restock-list', version: '1.0.0', name: 'Restock List', nameJa: 'Restock List' }, 'build-manifest': {}, 'embedded-asset-bundle': {} })) node(`#${id}`).textContent = JSON.stringify(value);
-  let shared = '';
-  const context = vm.createContext({ document: { querySelector: node, querySelectorAll: selector => selector === '.app-mobile-bottom-item' ? tabs : [], getElementById: id => node(`#${id}`), addEventListener() {}, documentElement: {}, title: '', activeElement: null }, window: { addEventListener() {} }, HTMLElement: Element, localStorage: { getItem: key => saved.get(key) || null, setItem: (key, value) => saved.set(key, value) }, navigator: { language: 'en', clipboard: { writeText: async value => { shared = value; } } }, location: { protocol: 'https:', href: 'https://example.test/', hash: '' }, history: { replaceState() {} }, matchMedia: () => ({ matches: false }), crypto: webcrypto, setTimeout: () => 1, clearTimeout() {}, requestAnimationFrame() {}, TextEncoder, TextDecoder, Blob, Response, URL, Uint8Array, btoa, atob });
-  const expose = `globalThis.app = { renderAll, purchaseItem, deleteItem, importDataFile, shareCurrent, decodeShare, setItemState, mobileNav, getData: () => data };`;
-  vm.runInContext(runtime.replace(/\}\)\(\);\s*$/, `${expose}\n})();`), context);
-  return { ...context.app, node, saved, shared: () => shared, select(store) { node('#buyStoreFilter').value = store === null ? 'all' : JSON.stringify(store); node('#buyStoreFilter').dispatch('change'); }, rows() { return [...node('#buyList').innerHTML.matchAll(/data-item-id="([^"]+)"/g)].map(match => match[1]); }, async confirm(action) { const pending = action(); node('#appConfirmOk').onclick(); await pending; } };
-}
-function item(id, store, status = 'low', regular = true) { return { id, name: id, store, status, regular, category: '', createdAt: 1 }; }
-function fixtures() { return [item('market', 'Market'), item('drug', 'Drugstore', 'out'), item('none', ''), item('once', 'Market', 'buy', false), item('stock', 'Quiet', 'stocked')]; }
+import { html, app, item, fixtures } from './helpers/app.mjs';
 
 test('store selector is visibly labeled, native, and keyboard focusable', () => {
   assert.match(html, /<label[^>]*for="buyStoreFilter"/);
