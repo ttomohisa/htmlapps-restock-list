@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added localized Copy visible list beside the store filter, with store-grouped plain text, click-time snapshots, and empty-view disabling.
+- Fixed share-link clipboard fallback exceptions that left a temporary textarea behind and failed to show an error. Both copy actions now handle unavailable or denied APIs, clean up, and restore focus safely.
+- Added regression coverage for visible-list scope, purchase/Undo availability, translated names, delayed fallback snapshots, and clipboard success/failure paths.
+
 - Added a session-only shopping-store filter with All stores, Unassigned, and collision-safe named stores.
 - Kept selected stores stable through purchases, Undo, edits, language changes, and tab navigation, including an empty-store recovery action.
 - Made all-store sharing and summary scope explicit while filtering.

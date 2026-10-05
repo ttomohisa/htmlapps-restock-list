@@ -143,8 +143,9 @@ if ([string]::IsNullOrWhiteSpace([string]$app.slug)) { throw "app.config.json: s
 if ([string]::IsNullOrWhiteSpace([string]$app.version)) { throw "app.config.json: version is required" }
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js 20 or newer is required for runtime regression tests." }
-& node --test (Join-Path $Root "tests\store-filter.test.mjs")
-if ($LASTEXITCODE -ne 0) { throw "Store-filter runtime regression tests failed." }
+$runtimeTests = @(Get-ChildItem -Path (Join-Path $Root "tests") -Filter "*.test.mjs" | ForEach-Object { $_.FullName })
+& node --test @runtimeTests
+if ($LASTEXITCODE -ne 0) { throw "Runtime regression tests failed." }
 
 $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
