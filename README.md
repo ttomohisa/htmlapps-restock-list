@@ -51,11 +51,13 @@ On Windows 10/11:
 build-standalone.bat
 ```
 
-With Node.js 20 or newer installed, run `node --test tests/*.test.mjs` for the store-filter and clipboard runtime suites, or `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1` for tests and both verified builds.
+With Node.js 20 or newer installed, run `node --test tests/*.test.mjs` for the store-filter, clipboard, header, and import-ownership runtime suites, or `powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\scripts\check-repository.ps1` for tests and both verified builds.
 
 The generated files are written to `dist/`. After building, copy `dist/index.html` to `restock-list.html` to refresh the checked-in readable download. Edit `src/index.template.html`, not the generated HTML directly.
 
 ## Usage
+
+Use **EN / JA** in the header to switch languages without resetting your list or store filter. The adjacent Help button opens localized instructions. JSON import replaces current data; if you select another backup while a read is pending, only the latest selection may finish. A failed import leaves your current valid data unchanged.
 
 Choose a store, then **Copy visible list** to copy only the displayed items. Plain-text copying also works from a local HTML file when your browser allows it. A failed copy shows a message; your shopping data is unchanged. **Share link** still includes every store regardless of the filter.
 

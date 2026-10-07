@@ -3,7 +3,7 @@
   "name": "Restock List",
   "nameJa": "Restock List",
   "slug": "restock-list",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local-first shopping list that turns regular items into a lightweight restock workflow.",
   "descriptionJa": "定番品を「ある・少ない・ない」で管理する、完全ローカル処理のシンプルな買い物リストです。",
   "defaultLanguage": "auto",

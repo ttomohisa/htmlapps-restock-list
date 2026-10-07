@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.0.1
+
+- Standardized the header language target to EN / JA with localized target names and titles, preserving the exact local-processing privacy labels.
+- Fixed delayed older JSON imports and read failures replacing newer data or Undo feedback. Preserved same-file reselection and documented latest-selection behavior in bilingual Help.
+- Added a localized accessible name for the JSON backup filename field.
+- Added header, Help localization, filename accessibility, and asynchronous import ownership regressions.
 
 - Added localized Copy visible list beside the store filter, with store-grouped plain text, click-time snapshots, and empty-view disabling.
 - Fixed share-link clipboard fallback exceptions that left a temporary textarea behind and failed to show an error. Both copy actions now handle unavailable or denied APIs, clean up, and restore focus safely.
