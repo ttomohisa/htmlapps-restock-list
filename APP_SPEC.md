@@ -46,12 +46,13 @@ The app is intentionally local-first, account-free, and useful as a single HTML 
 - Provide status filters in the regular-items view.
 - Provide lightweight built-in product suggestions while typing a one-off item, and prefer matching existing regular items where applicable.
 - Category and store fields accept free text and allow previously used values to be reopened and selected again.
-- Provide JSON export with a user-editable filename and JSON import that replaces the current dataset.
+- Provide JSON export with a user-editable filename labeled バックアップのファイル名 / Backup filename for assistive technology and JSON import that replaces the current dataset.
+- Only the latest selected JSON file may replace data or report an import result. Ignore older delayed reads and failures, preserving newer data, filters, dialog state, and Undo feedback. Clear the file picker synchronously so the same file can be selected again; cancelled selection does not replace data.
 - Provide per-entry purchase-history deletion, plus destructive history-clear and reset confirmations with `AppConfirm`.
 - Show a visible sample-data banner on first launch and remove the banner after the user clears the bundled sample data.
 - Provide a share link that embeds the current shopping list after `#list=` only when the app is opened from http/https. Local `file://` opening must not invoke native sharing. No server upload or runtime request is allowed.
 - On opening a valid shared link, show an explicit import banner before adding received items.
-- Switch Japanese and English without reloading.
+- Switch Japanese and English without reloading. Show the target as EN / JA, with localized target aria-label and title: 英語に切り替え / Switch to Japanese. Preserve the exact privacy badge 完全ローカル処理 / Fully local processing.
 - Use the template's light-only visual system and `#16624F` accent.
 - Use the template mobile bottom-page pattern with three phone tabs: Buy, Regulars, History.
 - Desktop keeps all three sections visible in normal flow.
@@ -138,7 +139,9 @@ Current stable Chromium, Firefox, and Safari on desktop and mobile. Direct `file
 - Purchasing or deleting the last item in a filtered store keeps its empty view; Undo restores the item under the same filter.
 - Visible-list copying respects exact named/unassigned store filters and translated-name collisions, and remains a click-time snapshot if a clipboard fallback is delayed.
 - Both list and link copying report failures without an unhandled rejection or leftover textarea.
-- JSON export has an editable safe filename and JSON import restores valid backups.
+- JSON export has an editable safe filename with a localized accessible name. Language switching preserves the edited filename, and JSON import restores valid backups.
+- A superseded JSON import cannot overwrite a newer successful or pending import, replace newer error/Undo feedback, close a reopened dialog, or clear a newer picker selection. A failed latest import preserves existing valid data.
+- Header language targets, privacy wording, and Help title/controls localize in both languages without resetting shopping data or the store filter.
 - Japanese and English both fit at 360px width.
 - The mobile bottom navigation switches the three workflow pages rather than merely scrolling to them.
 
@@ -150,4 +153,4 @@ The upper-right help dialog explains:
 - purchase-history recording and deletion,
 - local-only privacy behavior,
 - visible-list plain-text copying and all-store fragment-based sharing,
-- browser-storage loss risk and JSON backup.
+- browser-storage loss risk, JSON replacement, and latest-selected-file import behavior.

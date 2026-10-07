@@ -3,25 +3,38 @@ import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 
 export const html = readFileSync(process.env.RESTOCK_HTML || new URL('../../src/index.template.html', import.meta.url), 'utf8');
+const configText = html.match(/<script id="app-config"[^>]*>([\s\S]*?)<\/script>/)[1];
+const config = configText.startsWith('__') ? JSON.parse(readFileSync(new URL('../../app.config.json', import.meta.url), 'utf8')) : JSON.parse(configText);
 const runtime = html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];
 // Run the real application in a small DOM adapter; browser layout/keyboard QA is separate.
 export function app(items = fixtures(), options = {}) {
   const nodes = new Map(), textareas = [], writes = [], timers = []; let shared = '', fallbackCalls = 0, document;
   class Element {
-    constructor() { this.value = ''; this.style = {}; this.disabled = false; this.innerHTML = ''; this.textContent = ''; this.dataset = {}; this.hidden = false; this.events = {}; this.open = false; this.isConnected = true; this.classList = { add() {}, remove() {}, toggle() {}, contains: () => false }; }
+    constructor() { this.value = ''; this.style = {}; this.disabled = false; this.innerHTML = ''; this.textContent = ''; this.dataset = {}; this.attributes = new Map(); this.hidden = false; this.events = {}; this.open = false; this.isConnected = true; this.classList = { add() {}, remove() {}, toggle() {}, contains: () => false }; }
     get disabled() { return this._disabled; }
     set disabled(value) { this._disabled=value; if(value && document?.activeElement === this) document.activeElement=document.body; }
     addEventListener(type, fn) { (this.events[type] ||= []).push(fn); }
     dispatch(type, target = this) { for (const fn of this.events[type] || []) fn({ target, preventDefault() {} }); }
-    setAttribute() {} removeAttribute() {} querySelector() { return null; } focus() { if(!this.disabled) document.activeElement = this; } select() { if(options.selectThrows) throw Error('selection failed'); this.focus(); } remove() { textareas.splice(textareas.indexOf(this), 1); this.isConnected = false; if(document.activeElement === this) document.activeElement = document.body; } showModal() { this.open = true; } close() { this.open = false; }
+    setAttribute(name, value) { this.attributes.set(name, String(value)); } getAttribute(name) { return this.attributes.get(name) ?? null; } removeAttribute(name) { this.attributes.delete(name); } querySelector() { return null; } focus() { if(!this.disabled) document.activeElement = this; } select() { if(options.selectThrows) throw Error('selection failed'); this.focus(); } remove() { textareas.splice(textareas.indexOf(this), 1); this.isConnected = false; if(document.activeElement === this) document.activeElement = document.body; } showModal() { this.open = true; } close() { this.open = false; }
   }
   const node = selector => { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); };
   const tabs = ['buy', 'regular', 'history'].map(key => { const button = new Element(); button.dataset = { mobileKey: key, mobilePageTarget: `${key}Page` }; return button; });
-  const saved = new Map([['restock-list:language', 'en'], ['restock-list:data', JSON.stringify({ items, history: [], settings: { defaultStore: '', sampleDataVisible: false } })]]);
-  for (const [id, value] of Object.entries({ 'app-config': { slug: 'restock-list', version: '1.0.0', name: 'Restock List', nameJa: 'Restock List' }, 'build-manifest': {}, 'embedded-asset-bundle': {} })) node(`#${id}`).textContent = JSON.stringify(value);
+  const saved = new Map([['restock-list:language', options.language || 'en'], ['restock-list:data', JSON.stringify({ items, history: [], settings: { defaultStore: '', sampleDataVisible: false } })]]);
+  for (const [id, value] of Object.entries({ 'app-config': config, 'build-manifest': {}, 'embedded-asset-bundle': {} })) node(`#${id}`).textContent = JSON.stringify(value);
 
-  const translated = [...html.matchAll(/<[^>]+id="([^"]+)"[^>]+data-i18n="([^"]+)"[^>]*>/g)].map(([, id, key]) => { const el=node(`#${id}`); el.dataset.i18n=key; return el; });
-  document = { querySelector: node, querySelectorAll: selector => selector === '.app-mobile-bottom-item' ? tabs : selector === '[data-i18n]' ? translated : [], getElementById: id => node(`#${id}`), addEventListener() {}, documentElement: {}, title: '', activeElement: null,
+  const translated = new Map(['data-i18n', 'data-i18n-title', 'data-i18n-aria-label', 'data-i18n-placeholder'].map(key => [key, []]));
+  for (const [, attributes] of html.matchAll(/<[a-z][^>]*?\s((?:[^>])*data-i18n(?:-[a-z-]+)?="[^"]+"[^>]*)>/g)) {
+    const id = attributes.match(/(?:^|\s)id="([^"]+)"/)?.[1];
+    const el = id ? node(`#${id}`) : new Element();
+    for (const [key, elements] of translated) {
+      const value = attributes.match(new RegExp(`\\b${key}="([^"]+)"`))?.[1];
+      if (!value) continue;
+      el.dataset[key.slice(5).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = value;
+      elements.push(el);
+      nodes.set(`[${key}="${value}"]`, el);
+    }
+  }
+  document = { querySelector: node, querySelectorAll: selector => selector === '.app-mobile-bottom-item' ? tabs : translated.get(selector.slice(1, -1)) || [], getElementById: id => node(`#${id}`), addEventListener() {}, documentElement: {}, title: '', activeElement: null,
     createElement() { if(options.createThrows) throw Error('creation failed'); return new Element(); },
     body: { appendChild(el) { textareas.push(el); } },
     execCommand: options.execCommand === 'missing' ? undefined : () => { fallbackCalls++; if(options.onFallback) options.onFallback(document); if(options.execCommand === 'throw') throw Error('copy unsupported'); const ok=options.execCommand !== false; if(ok) shared=textareas.at(-1).value; return ok; }
