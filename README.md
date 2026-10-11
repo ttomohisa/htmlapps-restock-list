@@ -59,8 +59,6 @@ The generated files are written to `dist/`. After building, copy `dist/index.htm
 
 Use **EN / JA** in the header to switch languages without resetting your list or store filter. The adjacent Help button opens localized instructions. JSON import replaces current data; if you select another backup while a read is pending, only the latest selection may finish. A failed import leaves your current valid data unchanged.
 
-Help, item editing, data management, and confirmation dialogs keep the background page still while open. Scroll long content inside the dialog; closing it restores normal page scrolling.
-
 Choose a store, then **Copy visible list** to copy only the displayed items. Plain-text copying also works from a local HTML file when your browser allows it. A failed copy shows a message; your shopping data is unchanged. **Share link** still includes every store regardless of the filter.
 
 1. Review the sample data, then use **Clear sample data** to remove records still matching the original samples. Added or changed items and actual purchase history stay.
