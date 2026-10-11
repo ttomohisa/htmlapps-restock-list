@@ -19,7 +19,7 @@ export function app(items = fixtures(), options = {}) {
   }
   const node = selector => { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); };
   const tabs = ['buy', 'regular', 'history'].map(key => { const button = new Element(); button.dataset = { mobileKey: key, mobilePageTarget: `${key}Page` }; return button; });
-  const saved = new Map([['restock-list:language', options.language || 'en'], ['restock-list:data', JSON.stringify({ items, history: [], settings: { defaultStore: '', sampleDataVisible: false } })]]);
+  const saved = new Map([['restock-list:language', options.language || 'en'], ['restock-list:data', JSON.stringify(options.data || { items, history: [], settings: { defaultStore: '', sampleDataVisible: false } })]]);
   for (const [id, value] of Object.entries({ 'app-config': config, 'build-manifest': {}, 'embedded-asset-bundle': {} })) node(`#${id}`).textContent = JSON.stringify(value);
 
   const translated = new Map(['data-i18n', 'data-i18n-title', 'data-i18n-aria-label', 'data-i18n-placeholder'].map(key => [key, []]));

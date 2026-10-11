@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2
+
+- Lock background page scrolling while native modal dialogs are open, preserving inner scrolling and native close behavior. Add root/body modal-state regressions and bilingual Help guidance.
+- Fix Clear sample deleting user-created items and purchase history. Match only known seed IDs with original content, preserve changed/incomplete records and actual purchases, and ignore confirmation after dataset replacement. Add mixed-data, cancellation, repeat/reload, collision, legacy-field, and deferred-confirmation regressions with bilingual safety guidance.
+
 ## 1.0.1
 
 - Standardized the header language target to EN / JA with localized target names and titles, preserving the exact local-processing privacy labels.

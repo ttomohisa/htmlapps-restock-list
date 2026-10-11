@@ -37,8 +37,8 @@ for (const language of ['ja', 'en']) test(`header names the language target and 
   assert.equal(a.saved.get('restock-list:data'), saved);
 });
 
-test('initialized version comes from the single 1.0.1 patch metadata', () => {
-  assert.equal(app().node('#versionBadge').textContent, 'v1.0.1');
+test('initialized version comes from the single 1.0.2 patch metadata', () => {
+  assert.equal(app().node('#versionBadge').textContent, 'v1.0.2');
 });
 
 for (const language of ['ja', 'en']) test(`Help remains localized and opens/closes the native dialog in ${language}`, () => {
