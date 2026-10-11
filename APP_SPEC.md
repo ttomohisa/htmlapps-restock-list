@@ -50,6 +50,8 @@ The app is intentionally local-first, account-free, and useful as a single HTML 
 - Only the latest selected JSON file may replace data or report an import result. Ignore older delayed reads and failures, preserving newer data, filters, dialog state, and Undo feedback. Clear the file picker synchronously so the same file can be selected again; cancelled selection does not replace data.
 - Provide per-entry purchase-history deletion, plus destructive history-clear and reset confirmations with `AppConfirm`.
 - Show a visible sample-data banner on first launch and remove the banner after the user clears the bundled sample data.
+- Clearing samples removes only records with known bundled IDs and exactly matching content fields; keep user-created items, edited or incomplete seed rows, ID collisions with different content, and actual purchase history even when it references a seed item. Preserve settings except the sample-banner flag. Cancel and a dataset replacement during confirmation must not delete anything.
+- Seed timestamps are relative to the original load and cannot be compared with freshly generated seed dates. Imported records with exact bundled IDs and content are indistinguishable from original samples and are treated as samples; no provenance field or schema migration is added.
 - Provide a share link that embeds the current shopping list after `#list=` only when the app is opened from http/https. Local `file://` opening must not invoke native sharing. No server upload or runtime request is allowed.
 - On opening a valid shared link, show an explicit import banner before adding received items.
 - Switch Japanese and English without reloading. Show the target as EN / JA, with localized target aria-label and title: 英語に切り替え / Switch to Japanese. Preserve the exact privacy badge 完全ローカル処理 / Fully local processing.
@@ -102,6 +104,7 @@ Regular status values are `stocked`, `low`, and `out`. One-off shopping items us
 - Purchase and delete actions that are safely reversible should use Toast + Undo where implemented.
 - Irreversible history clearing, reset, and destructive replacement use `AppConfirm`.
 - Dialogs restore or preserve sane keyboard navigation.
+- Native modal dialogs lock background page scrolling while preserving their own inner scrolling. Closing the last modal restores normal page scrolling.
 
 ## 8. Performance expectations
 
@@ -142,8 +145,10 @@ Current stable Chromium, Firefox, and Safari on desktop and mobile. Direct `file
 - JSON export has an editable safe filename with a localized accessible name. Language switching preserves the edited filename, and JSON import restores valid backups.
 - A superseded JSON import cannot overwrite a newer successful or pending import, replace newer error/Undo feedback, close a reopened dialog, or clear a newer picker selection. A failed latest import preserves existing valid data.
 - Header language targets, privacy wording, and Help title/controls localize in both languages without resetting shopping data or the store filter.
+- Clearing mixed sample/user data preserves added and changed items and actual purchase history after reload. Repeating clear with no active sample banner is harmless; legacy missing fields must not broaden sample matching.
 - Japanese and English both fit at 360px width.
 - The mobile bottom navigation switches the three workflow pages rather than merely scrolling to them.
+- Outside-wheel scrolling must not move the page behind an open modal at narrow or short viewports; inner dialog content remains scrollable and closing restores page scrolling.
 
 ## In-app help
 

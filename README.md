@@ -59,9 +59,11 @@ The generated files are written to `dist/`. After building, copy `dist/index.htm
 
 Use **EN / JA** in the header to switch languages without resetting your list or store filter. The adjacent Help button opens localized instructions. JSON import replaces current data; if you select another backup while a read is pending, only the latest selection may finish. A failed import leaves your current valid data unchanged.
 
+Help, item editing, data management, and confirmation dialogs keep the background page still while open. Scroll long content inside the dialog; closing it restores normal page scrolling.
+
 Choose a store, then **Copy visible list** to copy only the displayed items. Plain-text copying also works from a local HTML file when your browser allows it. A failed copy shows a message; your shopping data is unchanged. **Share link** still includes every store regardless of the filter.
 
-1. Review the sample data, then use **Clear sample data** when you are ready to start with an empty list.
+1. Review the sample data, then use **Clear sample data** to remove records still matching the original samples. Added or changed items and actual purchase history stay.
 2. Add frequently purchased items under **Regulars**.
 3. Change each regular item between **In stock / Low / Out**.
 4. Items marked Low or Out automatically appear under **To buy now**. Use **Filter by store** to focus on your current stop.
@@ -78,6 +80,8 @@ New share links use a compact row format, gzip compression, and Base64URL encodi
 Opening a shared link does **not** replace or erase the recipient's local data. The link first shows a received-list banner. Only after the recipient chooses **Add to my list** are the shared items merged into the current local list.
 
 ### Backup and restore
+
+Sample clearing compares bundled IDs and content, keeping incomplete or changed records. An imported exact copy of a bundled record is still treated as a sample; its original timestamp alone does not distinguish it.
 
 Open the gear icon to manage data:
 
